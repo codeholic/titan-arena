@@ -13,9 +13,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
-// Use require instead of import since order matters
-require('../styles/globals.css');
-
 const App: FC<AppProps> = ({ Component, pageProps }) => {
     const [mode, setMode] = useState('dark');
 
