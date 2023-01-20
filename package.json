@@ -33,9 +33,13 @@
         "lint": "prettier --check 'src/{*,**/*}.{ts,tsx,js,jsx,json}' && eslint && next lint"
     },
     "dependencies": {
+        "@emotion/react": "^11.10.5",
+        "@emotion/styled": "^11.10.5",
+        "@mui/icons-material": "^5.11.0",
+        "@mui/material": "^5.11.5",
         "@solana/wallet-adapter-base": "^0.9.20",
+        "@solana/wallet-adapter-material-ui": "^0.16.25",
         "@solana/wallet-adapter-react": "^0.15.26",
-        "@solana/wallet-adapter-react-ui": "^0.9.24",
         "@solana/wallet-adapter-wallets": "^0.19.9",
         "next": "^12.2.5",
         "react": "^18.0.0",

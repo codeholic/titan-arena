@@ -5,12 +5,8 @@ import Image from 'next/image';
 import React from 'react';
 import styles from '../styles/Home.module.css';
 
-const WalletDisconnectButtonDynamic = dynamic(
-    async () => (await import('@solana/wallet-adapter-react-ui')).WalletDisconnectButton,
-    { ssr: false }
-);
 const WalletMultiButtonDynamic = dynamic(
-    async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
+    async () => (await import('@solana/wallet-adapter-material-ui')).WalletMultiButton,
     { ssr: false }
 );
 
@@ -30,7 +26,6 @@ const Home: NextPage = () => {
 
                 <div className={styles.walletButtons}>
                     <WalletMultiButtonDynamic />
-                    <WalletDisconnectButtonDynamic />
                 </div>
 
                 <p className={styles.description}>

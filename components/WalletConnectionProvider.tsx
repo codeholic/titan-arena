@@ -1,5 +1,6 @@
+import type { Adapter, WalletError } from '@solana/wallet-adapter-base';
+import { WalletDialogProvider, WalletMultiButton } from '@solana/wallet-adapter-material-ui';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
     BackpackWalletAdapter,
     BraveWalletAdapter,
@@ -8,8 +9,6 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import type { FC } from 'react';
 import React, { ReactNode, useMemo } from 'react';
-
-require('@solana/wallet-adapter-react-ui/styles.css');
 
 const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
@@ -28,9 +27,9 @@ const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => 
     return (
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} autoConnect>
-                <WalletModalProvider>
+                <WalletDialogProvider>
                     {children}
-                </WalletModalProvider>
+                </WalletDialogProvider>
             </WalletProvider>
         </ConnectionProvider>
     );
