@@ -1,5 +1,4 @@
 {
-    "extends": "../../../tsconfig.root.json",
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
     "compilerOptions": {
         "outDir": "lib",
@@ -18,5 +17,10 @@
         "jsx": "preserve",
         "incremental": true
     },
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules"],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    }
 }
