@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import dynamic from 'next/dynamic';
 import type { FC } from 'react';
 import React, { createContext, useMemo, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 
 const WalletConnectionProvider = dynamic(() => import('../../components/WalletConnectionProvider'), {
     ssr: false,
@@ -59,10 +60,15 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, [mode]);
 
+    const toastOptions = {
+        duration: 5000,
+    };
+
     return (
         <ColorModeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
+                <Toaster position="bottom-left" toastOptions={toastOptions} />
                 <WalletConnectionProvider>
                     <Component {...pageProps} />
                 </WalletConnectionProvider>
