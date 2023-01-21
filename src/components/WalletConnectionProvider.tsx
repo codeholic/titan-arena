@@ -1,5 +1,5 @@
-import type { Adapter, WalletError } from '@solana/wallet-adapter-base';
-import { WalletDialogProvider, WalletMultiButton } from '@solana/wallet-adapter-material-ui';
+import type { WalletError } from '@solana/wallet-adapter-base';
+import { WalletDialogProvider } from '@solana/wallet-adapter-material-ui';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import {
     BackpackWalletAdapter,
@@ -30,9 +30,7 @@ const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => 
     return (
         <ConnectionProvider endpoint={endpoint}>
             <WalletProvider wallets={wallets} onError={onError} autoConnect>
-                <WalletDialogProvider>
-                    {children}
-                </WalletDialogProvider>
+                <WalletDialogProvider>{children}</WalletDialogProvider>
             </WalletProvider>
         </ConnectionProvider>
     );

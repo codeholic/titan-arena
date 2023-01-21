@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import React, { createContext, useMemo, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 
-const WalletConnectionProvider = dynamic(() => import('../../components/WalletConnectionProvider'), {
+const WalletConnectionProvider = dynamic(() => import('../components/WalletConnectionProvider'), {
     ssr: false,
 });
 
