@@ -20,7 +20,7 @@ const Home: NextPage = () => {
             <Head>
                 <title>Titan Arena</title>
                 <meta name="description" content="Titan Arena: Rise to immortality" />
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="/i/dusa.png" />
             </Head>
 
             <Box>
