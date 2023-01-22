@@ -4,7 +4,9 @@ import Head from 'next/head';
 import React from 'react';
 
 import { Box, CardMedia, Container, Link, Stack, Typography } from '@mui/material';
-import BackButton from '@mui/icons-material/Reply';
+import BackIcon from '@mui/icons-material/Reply';
+import ArenaIcon from '@mui/icons-material/Stadium';
+import VestingIcon from '@mui/icons-material/AccountBalance';
 import { useTheme } from '@mui/material/styles';
 
 const WalletMultiButtonDynamic = dynamic(
@@ -33,7 +35,7 @@ const Home: NextPage = () => {
 
                     <Stack
                         px={4}
-                        py={1}
+                        py={2}
                         spacing={4}
                         direction="row"
                         alignItems="center"
@@ -43,13 +45,39 @@ const Home: NextPage = () => {
                             backgroundImage: 'linear-gradient(to right, rgb(83, 153, 141), rgb(110, 45, 167))',
                         }}
                     >
-                        <Box sx={{ flexGrow: 1 }}>
-                            <Link
-                                sx={{ display: 'inline-flex' }}
-                                alignItems="center"
-                                href="https://dashboard.titanarena.app"
+                        <Link
+                            sx={{ display: 'inline-flex' }}
+                            alignItems="center"
+                            href="https://dashboard.titanarena.app"
+                        >
+                            <BackIcon sx={{ mr: 1, mb: '5px' }} />
+                            <Typography
+                                sx={{
+                                    fontFamily: theme.typography.button,
+                                    fontSize: '20px',
+                                    letterSpacing: 2,
+                                }}
                             >
-                                <BackButton sx={{ mr: 1, mb: '5px' }} />
+                                Dashboard
+                            </Typography>
+                        </Link>
+
+                        <Link sx={{ display: 'inline-flex', color: '#F7FAFC' }} alignItems="center" href="/">
+                            <ArenaIcon sx={{ mr: 1, mb: '5px' }} />
+                            <Typography
+                                sx={{
+                                    fontFamily: theme.typography.button,
+                                    fontSize: '20px',
+                                    letterSpacing: 2,
+                                }}
+                            >
+                                Arena
+                            </Typography>
+                        </Link>
+
+                        <Box sx={{ flexGrow: 1 }}>
+                            <Link sx={{ display: 'inline-flex' }} alignItems="center" href="/vesting">
+                                <VestingIcon sx={{ mr: 1, mb: '5px' }} />
                                 <Typography
                                     sx={{
                                         fontFamily: theme.typography.button,
@@ -57,7 +85,7 @@ const Home: NextPage = () => {
                                         letterSpacing: 2,
                                     }}
                                 >
-                                    Dashboard
+                                    Vesting
                                 </Typography>
                             </Link>
                         </Box>
