@@ -218,6 +218,11 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@fontsource/teko@^4.5.9":
+  version "4.5.9"
+  resolved "https://registry.yarnpkg.com/@fontsource/teko/-/teko-4.5.9.tgz#fa960c83943cd42e077ec396a9524db04bb6f244"
+  integrity sha512-dU6kD7Zxutjf2uWNFhuquJuVVEuahW7S/Fv6otnHvOrG1J7pOEKexPQVkNdZQALgjdyJqLi5BZC87E1m7fk3pw==
+
 "@fractalwagmi/popup-connection@^1.0.18":
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/@fractalwagmi/popup-connection/-/popup-connection-1.0.18.tgz#3a69045f8393989c0014f97e44967020135142ea"
