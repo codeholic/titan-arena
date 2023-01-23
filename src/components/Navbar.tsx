@@ -48,9 +48,13 @@ export const Navbar = () => {
             }}
         >
             {menuItemProps.map((props, index) => {
-                const menuItem = <MenuItem key={index} {...props} />;
-
-                return index < menuItemProps.length - 1 ? menuItem : <Box sx={{ flexGrow: 1 }}>{menuItem}</Box>;
+                return index < menuItemProps.length - 1 ? (
+                    <MenuItem key={index} {...props} />
+                ) : (
+                    <Box key={index} sx={{ flexGrow: 1 }}>
+                        <MenuItem {...props} />
+                    </Box>
+                );
             })}
 
             <Box>
