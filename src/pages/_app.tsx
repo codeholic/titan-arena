@@ -21,6 +21,7 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
     };
 
     const joinFonts = (fonts: string[]) => fonts.map((font) => (font.indexOf(' ') < 0 ? font : `"${font}"`)).join(',');
+    const teko = joinFonts(['Teko', 'sans-serif']);
 
     const theme = createTheme({
         palette,
@@ -37,7 +38,7 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
                 'sans-serif',
             ]),
             button: {
-                fontFamily: joinFonts(['Teko', 'sans-serif']),
+                fontFamily: teko,
                 textTransform: 'uppercase',
                 fontSize: '16px',
                 letterSpacing: 2,
@@ -59,7 +60,7 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
                 styleOverrides: {
                     root: {
                         backgroundColor: '#1A365D !important',
-                        fontFamily: joinFonts(['Teko', 'sans-serif']),
+                        fontFamily: teko,
                         textTransform: 'uppercase',
                     },
                 },
