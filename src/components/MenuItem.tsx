@@ -6,15 +6,15 @@ import { useTheme } from '@mui/material/styles';
 export type MenuItemProps = {
     href: string;
     icon: ReactNode;
-    active?: boolean;
+    isActive?: boolean;
     children: ReactNode;
 };
 
-export const MenuItem = ({ href, icon, active, children }: MenuItemProps) => {
+export const MenuItem = ({ href, icon, isActive, children }: MenuItemProps) => {
     const theme = useTheme();
 
     return (
-        <Link href={href} sx={{ display: 'inline-flex', ...(active ? { color: '#F7FAFC' } : {}) }} alignItems="center">
+        <Link href={href} sx={{ display: 'inline-flex', ...(isActive ? { color: '#F7FAFC' } : {}) }} alignItems="center">
             {icon}
             <Typography
                 sx={{

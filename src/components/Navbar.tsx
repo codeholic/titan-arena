@@ -24,7 +24,7 @@ export const Navbar = () => {
         {
             href: '/',
             icon: <CupIcon sx={{ mr: 1, mb: '5px' }} />,
-            active: true,
+            isActive: true,
             children: 'Quests',
         },
         {
