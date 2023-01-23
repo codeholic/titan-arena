@@ -14,7 +14,11 @@ export const MenuItem = ({ href, icon, isActive, children }: MenuItemProps) => {
     const theme = useTheme();
 
     return (
-        <Link href={href} sx={{ display: 'inline-flex', ...(isActive ? { color: '#F7FAFC' } : {}) }} alignItems="center">
+        <Link
+            href={href}
+            sx={{ display: 'inline-flex', ...(isActive ? { color: '#F7FAFC' } : {}) }}
+            alignItems="center"
+        >
             {icon}
             <Typography
                 sx={{
