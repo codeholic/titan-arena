@@ -38,6 +38,7 @@
         "@fontsource/teko": "^4.5.9",
         "@mui/icons-material": "^5.11.0",
         "@mui/material": "^5.11.5",
+        "@solana/spl-token": "^0.3.7",
         "@solana/wallet-adapter-base": "^0.9.20",
         "@solana/wallet-adapter-material-ui": "^0.16.25",
         "@solana/wallet-adapter-react": "^0.15.26",
