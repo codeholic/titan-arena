@@ -20,53 +20,52 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
         mode: 'dark',
     };
 
-    const joinFonts = (fonts: string[]) =>
-        fonts.map((font) => (font.indexOf(' ') < 0 ? font : `"${font}"`)).join(',');
+    const joinFonts = (fonts: string[]) => fonts.map((font) => (font.indexOf(' ') < 0 ? font : `"${font}"`)).join(',');
 
     const theme = createTheme({
-            palette,
-            typography: {
-                fontFamily: joinFonts([
-                    '-apple-system',
-                    'BlinkMacSystemFont',
-                    'Segoe UI',
-                    'Roboto',
-                    'Oxygen-Sans',
-                    'Ubuntu',
-                    'Cantarell',
-                    'Helvetica Neue',
-                    'sans-serif',
-                ]),
-                button: {
-                    fontFamily: joinFonts(['Teko', 'sans-serif']),
-                    textTransform: 'uppercase',
-                    fontSize: '16px',
-                    letterSpacing: 2,
-                },
+        palette,
+        typography: {
+            fontFamily: joinFonts([
+                '-apple-system',
+                'BlinkMacSystemFont',
+                'Segoe UI',
+                'Roboto',
+                'Oxygen-Sans',
+                'Ubuntu',
+                'Cantarell',
+                'Helvetica Neue',
+                'sans-serif',
+            ]),
+            button: {
+                fontFamily: joinFonts(['Teko', 'sans-serif']),
+                textTransform: 'uppercase',
+                fontSize: '16px',
+                letterSpacing: 2,
             },
-            components: {
-                MuiLink: {
-                    styleOverrides: {
-                        root: {
-                            textDecoration: 'none',
-                            color: palette.text.primary,
-                            ':hover': {
-                                color: '#F7FAFC',
-                            },
+        },
+        components: {
+            MuiLink: {
+                styleOverrides: {
+                    root: {
+                        textDecoration: 'none',
+                        color: palette.text.primary,
+                        ':hover': {
+                            color: '#F7FAFC',
                         },
                     },
                 },
-                MuiDialogTitle: {
-                    styleOverrides: {
-                        root: {
-                            backgroundColor: '#1A365D !important',
-                            fontFamily: joinFonts(['Teko', 'sans-serif']),
-                            textTransform: 'uppercase',
-                        },
-                    }
-                }
             },
-        });
+            MuiDialogTitle: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: '#1A365D !important',
+                        fontFamily: joinFonts(['Teko', 'sans-serif']),
+                        textTransform: 'uppercase',
+                    },
+                },
+            },
+        },
+    });
 
     const toastOptions = {
         duration: 5000,
