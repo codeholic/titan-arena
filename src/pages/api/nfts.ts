@@ -8,6 +8,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await fs.readFile(filename, 'utf8').then((data) => {
         const nfts = JSON.parse(data);
 
-        res.status(200).json(nfts.map(({ name, mint, image_url, race }: any) => ({ name, mint, image_url, race })));
+        res.status(200).json(nfts.map(({ mint, image_url, race }: any) => ({ mint, image_url, race })));
     });
 }
