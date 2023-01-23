@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
-import { Grid, CardMedia, Skeleton } from '@mui/material';
+import { Box, Grid, CardMedia, Skeleton } from '@mui/material';
 
 export const NftList = () => {
     const wallet = useWallet();
@@ -32,7 +32,9 @@ export const NftList = () => {
 
     const { data, isLoading } = useSWR('/api/nfts', fetcher);
 
-    return (
+    return !wallet.connected ? (
+        <Box my={2}>Connect your wallet to see your NFTs.</Box>
+    ) : (
         <Grid my={1} container spacing={2} columns={{ xs: 2, sm: 4, md: 6, lg: 8 }}>
             {!isLoading
                 ? data &&
