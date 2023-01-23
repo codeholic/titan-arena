@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { Box, Stack } from '@mui/material';
 
 import BackIcon from '@mui/icons-material/Reply';
-import ArenaIcon from '@mui/icons-material/Stadium';
+import CupIcon from '@mui/icons-material/EmojiEvents';
 import VestingIcon from '@mui/icons-material/AccountBalance';
 
 const WalletMultiButtonDynamic = dynamic(
@@ -23,9 +23,9 @@ export const Navbar = () => {
         },
         {
             href: '/',
-            icon: <ArenaIcon sx={{ mr: 1, mb: '5px' }} />,
+            icon: <CupIcon sx={{ mr: 1, mb: '5px' }} />,
             active: true,
-            children: 'Arena',
+            children: 'Quests',
         },
         {
             href: '/vesting',
