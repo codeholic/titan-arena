@@ -4,9 +4,9 @@ import { FC, forwardRef, useEffect, useState } from 'react';
 import { Nft } from '../hooks/useNfts';
 
 export type NftCardProps = {
-    name?: string;
-    setValue?: Function;
-    nft?: Nft;
+    name: string;
+    setValue: Function;
+    nft: Nft;
 };
 
 const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
@@ -15,19 +15,15 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
         const [checked, setChecked] = useState(false);
 
         useEffect(() => {
-            if (!nft) {
-                return;
-            }
-
             const image = new Image();
 
             image.src = nft.image_url;
             image.onload = () => setIsLoading(false);
         });
 
-        useEffect(() => setValue && setValue(name, checked), [name, checked, setValue]);
+        useEffect(() => setValue(name, checked), [name, checked, setValue]);
 
-        return nft && !isLoading ? (
+        return !isLoading ? (
             <>
                 <input
                     ref={ref}

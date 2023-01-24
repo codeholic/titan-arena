@@ -46,6 +46,7 @@
         "next": "^12.2.5",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
+        "react-hook-form": "^7.42.1",
         "react-hot-toast": "^2.4.0",
         "swr": "^2.0.1",
         "ts-node": "^10.9.1"

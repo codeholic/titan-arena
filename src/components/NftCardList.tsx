@@ -1,13 +1,16 @@
-import { Box, Breakpoint, Grid, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Grid, Skeleton, useMediaQuery, useTheme } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
-import { Nft } from '../hooks/useNfts';
+import { useForm } from 'react-hook-form';
 import { NftsContext } from '../pages';
 import NftCard from './NftCard';
 
 export const NftCardList = () => {
     const wallet = useWallet();
     const theme = useTheme();
+
+    const { register, handleSubmit, setValue } = useForm();
+    const onSubmit = (data: any) => console.log(data);
 
     const { nfts, isLoading } = useContext(NftsContext);
 
@@ -24,12 +27,26 @@ export const NftCardList = () => {
     ) : !isLoading && nfts?.length === 0 ? (
         <Box my={2}>No baby titans owned.</Box>
     ) : (
-        <Grid my={1} container spacing={2} columns={columns}>
-            {(isLoading || !nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
-                <Grid item key={index} xs={1}>
-                    {nft ? <NftCard name={`nfts.${nft.mint}`} setValue={() => {}} nft={nft} /> : <NftCard />}
-                </Grid>
-            ))}
-        </Grid>
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid my={1} container spacing={2} columns={columns}>
+                {(isLoading || !nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
+                    <Grid item key={index} xs={1}>
+                        {nft ? (
+                            <NftCard nft={nft} {...register(`nfts.${nft.mint}`)} setValue={setValue} />
+                        ) : (
+                            <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />
+                        )}
+                    </Grid>
+                ))}
+            </Grid>
+
+            {!isLoading && (
+                <Box my={2}>
+                    <Button type="submit" variant="contained">
+                        Submit
+                    </Button>
+                </Box>
+            )}
+        </form>
     );
 };
