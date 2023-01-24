@@ -7,10 +7,11 @@ export type NftCardProps = {
     name: string;
     setValue: Function;
     nft: Nft;
+    defaultChecked: boolean;
 };
 
-const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
-    ({ name, setValue, nft }: NftCardProps, ref) => {
+const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
+    ({ name, setValue, nft, defaultChecked }, ref) => {
         const [isLoading, setIsLoading] = useState(true);
         const [checked, setChecked] = useState(false);
 
@@ -23,6 +24,8 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
 
         useEffect(() => setValue(name, checked), [name, checked, setValue]);
 
+        useEffect(() => setChecked(defaultChecked), [defaultChecked]);
+
         return !isLoading ? (
             <>
                 <input
@@ -32,7 +35,6 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
                     name={name}
                     value="true"
                     checked={checked}
-                    onChange={(event) => setChecked(event.target.value === 'true')}
                 />
                 <CardMedia
                     image={nft.image_url}
@@ -42,9 +44,7 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
                         cursor: 'pointer',
                         ...(checked ? { border: '5px solid #FAF5FF', margin: '-5px' } : {}),
                     }}
-                    onClick={() => {
-                        setChecked(!checked);
-                    }}
+                    onClick={() => setChecked(!checked)}
                 />
             </>
         ) : (
