@@ -1,11 +1,14 @@
 import { Box, Grid } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Nft, useNfts } from '../hooks/useNfts';
+import { useContext } from 'react';
+import { Nft } from '../hooks/useNfts';
+import { NftsContext } from '../pages';
 import { NftCard } from './NftCard';
 
 export const NftCardList = () => {
     const wallet = useWallet();
-    const { nfts, isLoading } = useNfts();
+
+    const { nfts, isLoading } = useContext(NftsContext);
 
     return !wallet.connected ? (
         <Box my={2}>Connect your wallet to view baby titans.</Box>

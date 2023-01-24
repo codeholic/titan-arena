@@ -1,12 +1,25 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import React from 'react';
+import React, { createContext } from 'react';
 
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
 import { NftCardList } from '../components/NftCardList';
+import { Nft, useNfts } from '../hooks/useNfts';
+
+export type NftsContextProps = {
+    isLoading: boolean;
+    nfts?: Nft[];
+};
+
+export const NftsContext = createContext({
+    isLoading: false,
+    nfts: undefined,
+} as NftsContextProps);
 
 const Home: NextPage = () => {
+    const { isLoading, nfts } = useNfts();
+
     return (
         <>
             <Head>
@@ -24,7 +37,9 @@ const Home: NextPage = () => {
 
                 <Navbar />
 
-                <NftCardList />
+                <NftsContext.Provider value={{ isLoading, nfts }}>
+                    <NftCardList />
+                </NftsContext.Provider>
             </Container>
         </>
     );
