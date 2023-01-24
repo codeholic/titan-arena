@@ -14,8 +14,6 @@ export const NftCardList = () => {
 
     const { nfts, isLoading } = useContext(NftsContext);
 
-    let screen: string | undefined = undefined;
-
     const largeScreen = useMediaQuery(theme.breakpoints.up('md'));
     const mediumScreen = useMediaQuery(theme.breakpoints.up('md'));
     const smallScreen = useMediaQuery(theme.breakpoints.up('sm'));
@@ -29,7 +27,7 @@ export const NftCardList = () => {
     ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Grid my={1} container spacing={2} columns={columns}>
-                {(isLoading || !nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
+                {(!nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
                     <Grid item key={index} xs={1}>
                         {nft ? (
                             <NftCard nft={nft} {...register(`nfts.${nft.mint}`)} setValue={setValue} />
@@ -40,7 +38,7 @@ export const NftCardList = () => {
                 ))}
             </Grid>
 
-            {!isLoading && (
+            {nfts && (
                 <Box my={2}>
                     <Button type="submit" variant="contained">
                         Submit
