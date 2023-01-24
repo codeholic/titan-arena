@@ -42,7 +42,7 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                         borderRadius: '5px',
                         aspectRatio: '1/1',
                         cursor: 'pointer',
-                        ...(checked ? { border: '5px solid #FAF5FF', margin: '-5px' } : {}),
+                        ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
                     }}
                     onClick={() => setChecked(!checked)}
                 />
