@@ -1,29 +1,61 @@
 import { CardMedia, Skeleton } from '@mui/material';
-import { FC, useEffect, useState } from 'react';
+import { FC, forwardRef, useEffect, useState } from 'react';
 
 import { Nft } from '../hooks/useNfts';
 
 export type NftCardProps = {
+    name: string;
+    setValue: Function;
     nft?: Nft;
 };
 
-export const NftCard: FC<NftCardProps> = ({ nft }: NftCardProps) => {
-    const [isLoading, setIsLoading] = useState(true);
+const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
+    ({ name, setValue, nft }: NftCardProps, ref) => {
+        const [isLoading, setIsLoading] = useState(true);
+        const [checked, setChecked] = useState(false);
 
-    useEffect(() => {
-        if (!nft) {
-            return;
-        }
+        useEffect(() => {
+            if (!nft) {
+                return;
+            }
 
-        const image = new Image();
+            const image = new Image();
 
-        image.src = nft.image_url;
-        image.onload = () => setIsLoading(false);
-    });
+            image.src = nft.image_url;
+            image.onload = () => setIsLoading(false);
+        });
 
-    return nft && !isLoading ? (
-        <CardMedia component="img" image={nft.image_url} sx={{ borderRadius: '5px' }} />
-    ) : (
-        <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />
-    );
-};
+        useEffect(() => setValue(name, checked), [name, checked, setValue]);
+
+        return nft && !isLoading ? (
+            <>
+                <input
+                    ref={ref}
+                    style={{ display: 'none' }}
+                    type="checkbox"
+                    name={name}
+                    value="true"
+                    checked={checked}
+                    onChange={(event) => setChecked(event.target.value === 'true')}
+                />
+                <CardMedia
+                    image={nft.image_url}
+                    sx={{
+                        borderRadius: '5px',
+                        aspectRatio: '1/1',
+                        ...(checked ? { border: '5px solid #FAF5FF', margin: '-5px' } : {}),
+                    }}
+                    onClick={() => {
+                        setChecked(!checked);
+                    }}
+                />
+            </>
+        ) : (
+            <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />
+        );
+    }
+);
+
+NftCard.displayName = 'NftCard';
+
+export default NftCard;
