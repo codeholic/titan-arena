@@ -1,20 +1,22 @@
 import { Box, Grid, CardMedia, Skeleton } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useNfts } from '../hooks/useNfts';
+import { Nft, useNfts } from '../hooks/useNfts';
+import { NftCard } from './NftCard';
 
-export const NftList = () => {
+export const NftCardList = () => {
     const wallet = useWallet();
     const { nfts, isLoading } = useNfts();
 
     return !wallet.connected ? (
-        <Box my={2}>Connect your wallet to see your NFTs.</Box>
+        <Box my={2}>Connect your wallet to view NFTs.</Box>
     ) : (
         <Grid my={1} container spacing={2} columns={{ xs: 2, sm: 4, md: 6, lg: 8 }}>
             {!isLoading
                 ? nfts &&
-                  nfts.map(({ image_url }: any, index: number) => (
+                  nfts.length > 0 &&
+                  nfts.map((nft: Nft, index: number) => (
                       <Grid item key={index} xs={1}>
-                          <CardMedia component="img" image={image_url} sx={{ borderRadius: '5px' }} />
+                          <NftCard nft={nft} />
                       </Grid>
                   ))
                 : Array(16)

@@ -12,6 +12,7 @@ export type Trait = {
 export type Nft = {
     mint: string;
     name: string;
+    image_url: string;
     attributes?: Trait[];
     race: string;
     rank?: number;

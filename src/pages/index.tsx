@@ -4,7 +4,7 @@ import React from 'react';
 
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
-import { NftList } from '../components/NftList';
+import { NftCardList } from '../components/NftCardList';
 
 const Home: NextPage = () => {
     return (
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
 
                 <Navbar />
 
-                <NftList />
+                <NftCardList />
             </Container>
         </>
     );
