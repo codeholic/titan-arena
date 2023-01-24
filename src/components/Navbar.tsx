@@ -27,11 +27,6 @@ export const Navbar = () => {
             isActive: true,
             children: 'Quests',
         },
-        {
-            href: '/vesting',
-            icon: <VestingIcon sx={{ mr: 1, mb: '5px' }} />,
-            children: 'Vesting',
-        },
     ];
 
     return (
