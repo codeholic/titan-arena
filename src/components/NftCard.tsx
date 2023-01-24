@@ -43,6 +43,7 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
                     sx={{
                         borderRadius: '5px',
                         aspectRatio: '1/1',
+                        cursor: 'pointer',
                         ...(checked ? { border: '5px solid #FAF5FF', margin: '-5px' } : {}),
                     }}
                     onClick={() => {
