@@ -25,9 +25,9 @@ export const NftCardList = () => {
         <Box my={2}>No baby titans owned.</Box>
     ) : (
         <Grid my={1} container spacing={2} columns={columns}>
-            {(isLoading || !nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft: Nft, index: number) => (
+            {(isLoading || !nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
                 <Grid item key={index} xs={1}>
-                    <NftCard name={`nfts.${nft.mint}`} setValue={() => {}} nft={nft} />
+                    {nft ? <NftCard name={`nfts.${nft.mint}`} setValue={() => {}} nft={nft} /> : <NftCard />}
                 </Grid>
             ))}
         </Grid>

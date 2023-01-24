@@ -4,8 +4,8 @@ import { FC, forwardRef, useEffect, useState } from 'react';
 import { Nft } from '../hooks/useNfts';
 
 export type NftCardProps = {
-    name: string;
-    setValue: Function;
+    name?: string;
+    setValue?: Function;
     nft?: Nft;
 };
 
@@ -25,7 +25,7 @@ const NftCard: FC<NftCardProps> = forwardRef<HTMLInputElement, NftCardProps>(
             image.onload = () => setIsLoading(false);
         });
 
-        useEffect(() => setValue(name, checked), [name, checked, setValue]);
+        useEffect(() => setValue && setValue(name, checked), [name, checked, setValue]);
 
         return nft && !isLoading ? (
             <>
