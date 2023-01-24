@@ -10,8 +10,6 @@ export const NftCardList = () => {
 
     const { nfts, isLoading } = useContext(NftsContext);
 
-    console.log(nfts?.length);
-
     return !wallet.connected ? (
         <Box my={2}>Connect your wallet to view baby titans.</Box>
     ) : !isLoading && nfts?.length === 0 ? (
