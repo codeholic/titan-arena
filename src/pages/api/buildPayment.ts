@@ -29,7 +29,7 @@ export default async function handler(
 
     const payer = new PublicKey(params.payer);
     const authority = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.AUTHORITY_PRIVATE_KEY!)));
-    const salt = process.env.TRANSACTION_MESSAGE_SIGNATURE_SALT!;
+    const salt = process.env.TRANSACTION_MESSAGE_CHECKSUM_SALT!;
 
     const transaction = new Transaction();
 
@@ -47,7 +47,7 @@ export default async function handler(
         transaction.recentBlockhash = blockhash;
 
         const transactionMessage = transaction.serializeMessage().toString('base64');
-        const checksum = Buffer.from(sha512(transactionMessage + salt)).toString('base64');
+        const checksum = Buffer.from(sha512(transactionMessage + params.nftCount + salt)).toString('base64');
 
         res.status(200).json({ transactionMessage, checksum });
     });

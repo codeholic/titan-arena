@@ -98,6 +98,8 @@ export const NftCardList = () => {
                                       headers: { 'Content-Type': 'application/json' },
                                   })
                         );
+
+                        // TODO: display spinner and success message
                     })
             )
             .catch((err) => toast.error(err.message))
