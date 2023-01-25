@@ -9,7 +9,6 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import type { FC } from 'react';
 import React, { ReactNode, useMemo } from 'react';
-import toast from 'react-hot-toast';
 
 const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
@@ -25,11 +24,9 @@ const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => 
         [endpoint]
     );
 
-    const onError = (error: WalletError) => toast.error(error.message ? `${error.name}: ${error.message}` : error.name);
-
     return (
         <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} onError={onError}>
+            <WalletProvider wallets={wallets}>
                 <WalletDialogProvider featuredWallets={wallets.length}>{children}</WalletDialogProvider>
             </WalletProvider>
         </ConnectionProvider>

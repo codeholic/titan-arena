@@ -8,7 +8,7 @@ import { NftsContext } from '../pages';
 import NftCard from './NftCard';
 import { Message, PublicKey, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
-import { BuildStakeTransactionsData, TransactionData } from '../pages/api/buildStakeTransactions';
+import { BuildPaymentResult } from '../pages/api/buildPayment';
 
 export const NftCardList = () => {
     const wallet = useWallet();
@@ -31,8 +31,6 @@ export const NftCardList = () => {
             return;
         }
 
-        // console.log(Object.entries(selectedNfts).reduce((result, [key, value]) => (value ? [key, ...result] : result), []));
-
         return Object.values(selectedNfts).every((value) => value);
     }, [nfts, selectedNfts]);
 
@@ -51,55 +49,54 @@ export const NftCardList = () => {
     const authority = new PublicKey(process.env.NEXT_PUBLIC_AUTHORITY_PUBLIC_KEY!);
 
     const onSubmit = async (data: any) => {
-        if (!wallet || !nfts || !Object.keys(selectedNfts).length) {
+        const mints = Object.entries(selectedNfts).reduce(
+            (result, [key, value]) => (value ? [key, ...result] : result),
+            [] as string[]
+        );
+
+        if (!wallet || !nfts || mints.length === 0) {
             return;
         }
 
         setIsSubmitting(true);
 
-        await fetch('/api/buildStakeTransactions', {
+        await fetch('/api/buildPayment', {
             method: 'POST',
             body: JSON.stringify({
-                wallet: wallet.publicKey?.toBase58(),
-                mints: nfts.reduce(
-                    (result: string[], { mint }) => (selectedNfts[mint] ? [mint, ...result] : result),
-                    []
-                ),
+                payer: wallet.publicKey?.toBase58(),
+                nftCount: mints.length,
             }),
+            headers: { 'Content-Type': 'application/json' },
         })
             .then((data) =>
                 data
                     .json()
                     .catch(() => Promise.reject({ message: 'Internal server error.' }))
-                    .then((payload: BuildStakeTransactionsData) => {
+                    .then((result) => {
                         if (!data.ok) {
-                            return Promise.reject(payload);
+                            return Promise.reject(result);
                         }
 
-                        const [transactions, signatures] = payload.transactionData.reduce(
-                            ([transactions, signatures], transactionData: TransactionData) => [
-                                [
-                                    Transaction.populate(
-                                        Message.from(Buffer.from(transactionData.message!, 'base64')),
-                                        []
-                                    ),
-                                    ...transactions,
-                                ],
-                                [Buffer.from(transactionData.signature, 'base64'), ...signatures],
-                            ],
-                            [[] as Transaction[], [] as Buffer[]]
+                        const { transactionMessage, checksum } = result as BuildPaymentResult;
+
+                        const transaction = Transaction.populate(
+                            Message.from(Buffer.from(transactionMessage, 'base64')),
+                            []
                         );
 
-                        return wallet.signAllTransactions!(transactions).then(
-                            (transactions) =>
-                                Promise.all(
-                                    transactions.map((transaction, index) => {
-                                        transaction.addSignature(authority, signatures[index]);
-
-                                        return connection.sendRawTransaction(transaction.serialize());
-                                    })
-                                )
-                            // TODO: confirm transactions and display success message
+                        return wallet.signTransaction!(transaction).then(({ signature }) =>
+                            !signature
+                                ? Promise.reject('No signature.')
+                                : fetch('/api/confirmPayment', {
+                                      method: 'POST',
+                                      body: JSON.stringify({
+                                          mints,
+                                          transactionMessage,
+                                          checksum,
+                                          signature: signature.toString('base64'),
+                                      }),
+                                      headers: { 'Content-Type': 'application/json' },
+                                  })
                         );
                     })
             )
