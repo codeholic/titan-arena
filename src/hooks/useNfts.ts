@@ -11,7 +11,7 @@ export const useNfts = () => {
     const { connection } = useConnection();
 
     const fetcher = (url: string) => fetch(url).then((res) => res.json());
-    const res = useSWR('/api/nfts', fetcher);
+    const res = useSWR('/api/getNfts', fetcher);
 
     const [isLoading, setIsLoading] = useState(res.isLoading);
     const [nfts, setNfts] = useState<Nft[] | undefined>(undefined);
