@@ -1,6 +1,18 @@
 import CheckboxCheckedIcon from '@mui/icons-material/CheckBox';
 import CheckboxBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { Box, Button, Grid, Skeleton, ToggleButton, useMediaQuery, useTheme } from '@mui/material';
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    Grid,
+    Skeleton,
+    Stack,
+    ToggleButton,
+    useMediaQuery,
+    useTheme,
+} from '@mui/material';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useContext, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -47,13 +59,12 @@ export const NftCardList = () => {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const authority = new PublicKey(process.env.NEXT_PUBLIC_AUTHORITY_PUBLIC_KEY!);
+    const mints = Object.entries(selectedNfts).reduce(
+        (result, [key, value]) => (value ? [key, ...result] : result),
+        [] as string[]
+    );
 
     const onSubmit = async (data: any) => {
-        const mints = Object.entries(selectedNfts).reduce(
-            (result, [key, value]) => (value ? [key, ...result] : result),
-            [] as string[]
-        );
-
         if (!wallet || !nfts || mints.length === 0) {
             return;
         }
@@ -103,7 +114,7 @@ export const NftCardList = () => {
                     })
             )
             .catch((err) => toast.error(err.message))
-            .finally(() => setIsSubmitting(false));
+            .finally(() => setIsSubmitting(false)); // TODO: refresh
     };
 
     return !wallet.connected ? (
@@ -118,6 +129,7 @@ export const NftCardList = () => {
                     Select all
                 </ToggleButton>
             </Box>
+
             <Grid container spacing={2} columns={columns}>
                 {(!nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
                     <Grid item key={index} xs={1}>
@@ -127,6 +139,7 @@ export const NftCardList = () => {
                                 setValue={setValue}
                                 {...register(`nfts.${nft.mint}`)}
                                 defaultChecked={!!selectedNfts[nft.mint]}
+                                isSubmitting={isSubmitting}
                             />
                         ) : (
                             <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />
@@ -142,6 +155,15 @@ export const NftCardList = () => {
                     </Button>
                 </Box>
             )}
+
+            <Dialog open={isSubmitting}>
+                <DialogContent>
+                    <Stack direction="row" spacing={1} display="flex" alignItems="center">
+                        <CircularProgress size={20} />
+                        <Box>Sending {mints.length} titans on a quest...</Box>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
         </form>
     );
 };
