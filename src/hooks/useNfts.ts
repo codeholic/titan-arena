@@ -4,19 +4,7 @@ import fetch from 'node-fetch';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
-export type Trait = {
-    trait_name: string;
-    value: string;
-};
-
-export type Nft = {
-    mint: string;
-    name: string;
-    image_url: string;
-    attributes?: Trait[];
-    race: string;
-    rank?: number;
-};
+import { Nft } from '../lib/types';
 
 export const useNfts = () => {
     const wallet = useWallet();
@@ -28,41 +16,39 @@ export const useNfts = () => {
     const [isLoading, setIsLoading] = useState(res.isLoading);
     const [nfts, setNfts] = useState<Nft[] | undefined>(undefined);
 
+    const reload = () => {
+        if (!wallet.connected || !wallet.publicKey || !res.data) {
+            setIsLoading(false);
+            setNfts(undefined);
+            return;
+        }
+
+        setIsLoading(true);
+
+        (async () =>
+            await connection
+                .getParsedTokenAccountsByOwner(wallet.publicKey!, { programId: TOKEN_PROGRAM_ID })
+                .then(({ value }) => {
+                    const mints: any = value.reduce(
+                        (result, tokenAccount) => ({
+                            ...result,
+                            [tokenAccount.account.data.parsed.info.mint]: true,
+                        }),
+                        {}
+                    );
+
+                    setNfts(res.data.filter(({ mint }: any) => mints[mint]));
+                })
+                .finally(() => setIsLoading(false)))();
+    };
+
     useEffect(
         () => {
-            if (!wallet.connected || !wallet.publicKey) {
-                setIsLoading(false);
-                setNfts(undefined);
-                return;
-            }
-
-            setIsLoading(true);
-
-            if (res.data) {
-                (async () => {
-                    await connection
-                        .getParsedTokenAccountsByOwner(wallet.publicKey!, { programId: TOKEN_PROGRAM_ID })
-                        .then(({ value }) => {
-                            const mints: any = value.reduce(
-                                (result, tokenAccount) => ({
-                                    ...result,
-                                    [tokenAccount.account.data.parsed.info.mint]: true,
-                                }),
-                                {}
-                            );
-
-                            setNfts(res.data.filter(({ mint }: any) => mints[mint]));
-                        })
-                        .finally(() => setIsLoading(false));
-                })();
-            }
+            reload();
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [wallet.connected, wallet.publicKey]
     );
 
-    return {
-        nfts,
-        isLoading,
-    };
+    return { nfts, isLoading };
 };

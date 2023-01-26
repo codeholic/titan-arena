@@ -5,7 +5,8 @@ import React, { createContext } from 'react';
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
 import { NftCardList } from '../components/NftCardList';
-import { Nft, useNfts } from '../hooks/useNfts';
+import { useNfts } from '../hooks/useNfts';
+import { Nft } from '../lib/types';
 
 export type NftsContextProps = {
     isLoading: boolean;

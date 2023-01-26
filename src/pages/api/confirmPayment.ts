@@ -2,6 +2,11 @@ import { sha512 } from '@noble/hashes/sha512';
 import { Connection, Message, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { getFirestore } from 'firebase-admin/firestore';
+
+import { getCurrentGame, getNfts, getQuests } from '../../lib/queries';
+import { Nft } from '../../lib/types';
+
 type ConfirmPaymentParams = {
     mints: string[];
     transactionMessage: string;
@@ -29,19 +34,42 @@ export default async function handler(
         return;
     }
 
-    const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
-    const connection = new Connection(endpoint);
+    const allNfts: Record<string, Nft> = (await getNfts()).reduce(
+        (result, nft) => ({ [nft.mint]: nft, ...result }),
+        {}
+    );
 
-    const transaction = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
+    if (params.mints.some((mint) => !allNfts[mint])) {
+        res.status(400).json({ message: 'Wrong mints.' });
+    }
 
-    transaction.addSignature(transaction.feePayer!, Buffer.from(params.signature, 'base64'));
+    const db = getFirestore();
 
-    await connection
-        .sendRawTransaction(transaction.serialize())
-        .then((signature) =>
-            connection
-                .getLatestBlockhash()
-                .then((latestBlockhash) => connection.confirmTransaction({ signature, ...latestBlockhash }))
-        )
-        .then(() => res.status(200).json({}));
+    await db
+        .runTransaction(async (transaction) => {
+            const { ref: currentGameRef, data: currentGame } = await getCurrentGame(transaction);
+            const quests = await getQuests(currentGameRef, params.mints, transaction);
+
+            console.log(currentGame);
+            console.log(quests);
+
+            res.status(200).json({});
+        })
+        .catch(({ message }) => res.status(422).json({ message }));
+
+    // const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
+    // const connection = new Connection(endpoint);
+
+    // const transaction = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
+
+    // transaction.addSignature(transaction.feePayer!, Buffer.from(params.signature, 'base64'));
+
+    // await connection
+    //     .sendRawTransaction(transaction.serialize())
+    //     .then((signature) =>
+    //         connection
+    //             .getLatestBlockhash()
+    //             .then((latestBlockhash) => connection.confirmTransaction({ signature, ...latestBlockhash }))
+    //     )
+    //     .then(() => res.status(200).json({}));
 }

@@ -1,7 +1,7 @@
 import { CardMedia, Skeleton } from '@mui/material';
 import { forwardRef, useEffect, useState } from 'react';
 
-import { Nft } from '../hooks/useNfts';
+import { Nft } from '../lib/types';
 
 export type NftCardProps = {
     name: string;

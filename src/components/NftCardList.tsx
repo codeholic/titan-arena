@@ -107,7 +107,16 @@ export const NftCardList = () => {
                                           signature: signature.toString('base64'),
                                       }),
                                       headers: { 'Content-Type': 'application/json' },
-                                  })
+                                  }).then((data) =>
+                                      data
+                                          .json()
+                                          .catch(() => Promise.reject({ message: 'Internal server error.' }))
+                                          .then((result) => {
+                                              if (!data.ok) {
+                                                  return Promise.reject(result);
+                                              }
+                                          })
+                                  )
                         );
 
                         // TODO: display spinner and success message
