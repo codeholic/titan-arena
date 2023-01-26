@@ -1,6 +1,8 @@
 import { sha512 } from '@noble/hashes/sha512';
-import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { createTransferCheckedInstruction } from '@solana/spl-token';
+import { Connection, Keypair, PublicKey, /* SystemProgram, */ Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { findAssociatedAddress } from '../../lib/utils';
 
 type BuildPaymentParams = {
     payer: string;
@@ -16,8 +18,7 @@ export type BuildPaymentError = {
     message: string;
 };
 
-// const LAMPORTS_PER_NFT = BigInt('100000000');
-const LAMPORTS_PER_NFT = BigInt('1000000');
+const LAMPORTS_PER_NFT = BigInt('10000000');
 
 export default async function handler(
     req: NextApiRequest,
@@ -33,12 +34,24 @@ export default async function handler(
 
     const transaction = new Transaction();
 
+    const mint = new PublicKey(process.env.NEXT_PUBLIC_DUSA!);
+    const source = findAssociatedAddress({ mint, owner: payer });
+    const destination = findAssociatedAddress({ mint, owner: authority.publicKey });
+
     transaction.add(
-        SystemProgram.transfer({
-            fromPubkey: payer,
-            toPubkey: authority.publicKey,
-            lamports: LAMPORTS_PER_NFT * BigInt(params.nftCount),
-        })
+        // SystemProgram.transfer({
+        //     fromPubkey: payer,
+        //     toPubkey: authority.publicKey,
+        //     lamports: LAMPORTS_PER_NFT * BigInt(params.nftCount),
+        // }),
+        createTransferCheckedInstruction(
+            source,
+            mint,
+            destination,
+            payer,
+            LAMPORTS_PER_NFT * BigInt(params.nftCount),
+            9
+        )
     );
 
     transaction.feePayer = payer;
