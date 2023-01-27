@@ -4,6 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { getFirestore, getCurrentGame, getNfts, getQuests } from '../../lib/queries';
 import { Error, Nft } from '../../lib/types';
+import { getOwnedTokenMints } from '../../lib/utils';
 
 type ConfirmPaymentParams = {
     mints: string[];
@@ -30,7 +31,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         {}
     );
 
-    if (params.mints.some((mint) => !allNfts[mint])) {
+    const solanaTx = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
+    if (!solanaTx.feePayer) {
+        res.status(400).json({ message: 'Invalid transaction.' });
+    }
+
+    const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
+    const connection = new Connection(endpoint);
+
+    const ownedTokenMints = await getOwnedTokenMints({ connection, owner: solanaTx.feePayer! });
+
+    if (params.mints.some((mint) => !allNfts[mint] || !ownedTokenMints[mint])) {
         res.status(400).json({ message: 'Wrong mints.' });
     }
 
@@ -45,17 +56,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 return Promise.reject({ message: 'Duplicate quests.' });
             }
 
-            console.log(currentGame);
-            console.log(quests);
-
             res.status(200).json({});
         })
         .catch(({ message }) => res.status(422).json({ message }));
-
-    // const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
-    // const connection = new Connection(endpoint);
-
-    // const transaction = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
 
     // transaction.addSignature(transaction.feePayer!, Buffer.from(params.signature, 'base64'));
 
