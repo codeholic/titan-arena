@@ -2,9 +2,7 @@ import { sha512 } from '@noble/hashes/sha512';
 import { Connection, Message, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getFirestore } from 'firebase-admin/firestore';
-
-import { getCurrentGame, getNfts, getQuests } from '../../lib/queries';
+import { getFirestore, getCurrentGame, getNfts, getQuests } from '../../lib/queries';
 import { Error, Nft } from '../../lib/types';
 
 type ConfirmPaymentParams = {

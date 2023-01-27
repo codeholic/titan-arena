@@ -1,9 +1,19 @@
 import { promises as fs } from 'fs';
-import { getFirestore, Transaction, DocumentReference } from 'firebase-admin/firestore';
+import admin from 'firebase-admin';
+import { getFirestore as origGetFirestore, Transaction, DocumentReference } from 'firebase-admin/firestore';
 import path from 'path';
 
 import { Clan, Game, Nft, Quest } from './types';
 import { chunks } from './utils';
+
+export const getFirestore = () => {
+    if (!admin.apps.length) {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!);
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    }
+
+    return origGetFirestore();
+};
 
 export const getCurrentGame = async (transaction: Transaction | undefined = undefined) => {
     const db = getFirestore();
