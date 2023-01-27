@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import { Game, Nft, Quest } from '../lib/types';
 
-export const useQuests = (nfts?: Nft[]): { quests?: Quest[]; currentGame?: Game; isLoading: boolean } => {
+export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; currentGame?: Game; isLoading: boolean } => {
     const fetcher = (url: string, mints: string[]) =>
         fetch(url, {
             method: 'POST',
@@ -18,10 +18,14 @@ export const useQuests = (nfts?: Nft[]): { quests?: Quest[]; currentGame?: Game;
         return !!mints && fetcher(url, mints);
     });
 
-    const { quests, currentGame } = data || {};
+    const { quests: questArray, currentGame } = data || {};
+    const quests = useMemo(() => {
+        if (!mints || !questArray) {
+            return;
+        }
 
-    console.log(nfts);
-    console.log(data);
+        return mints.reduce((result, mint, index) => ({ [mint]: questArray[index], ...result }), {});
+    }, [mints, questArray]);
 
     return { quests, currentGame, isLoading };
 };

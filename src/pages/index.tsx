@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useMemo } from 'react';
 
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
@@ -12,7 +12,7 @@ import { useQuests } from '../hooks/useQuests';
 export type DataContextProps = {
     isLoading: boolean;
     nfts?: Nft[];
-    quests?: Quest[];
+    quests?: Record<string, Quest>;
     currentGame?: Game;
 };
 
@@ -24,12 +24,10 @@ export const DataContext = createContext({
 } as DataContextProps);
 
 const Home: NextPage = () => {
-    const [isLoading, setIsLoading] = useState(false);
-
     const { nfts, isLoading: areNftsLoading } = useNfts();
     const { quests, currentGame, isLoading: areQuestsLoading } = useQuests(nfts);
 
-    useEffect(() => setIsLoading(areNftsLoading || areQuestsLoading), [areNftsLoading, areQuestsLoading]);
+    const isLoading = useMemo(() => areNftsLoading || areQuestsLoading, [areNftsLoading, areQuestsLoading]);
 
     return (
         <>

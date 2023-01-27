@@ -57,7 +57,6 @@ export const NftCardList = () => {
     };
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const authority = new PublicKey(process.env.NEXT_PUBLIC_AUTHORITY_PUBLIC_KEY!);
     const mints = Object.entries(selectedNfts).reduce(
         (result, [key, value]) => (value ? [key, ...result] : result),
         [] as string[]
@@ -148,6 +147,7 @@ export const NftCardList = () => {
                                 {...register(`nfts.${nft.mint}`)}
                                 defaultChecked={!!selectedNfts[nft.mint]}
                                 isSubmitting={isSubmitting}
+                                quest={quests && quests[nft.mint]}
                             />
                         ) : (
                             <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />

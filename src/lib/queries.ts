@@ -19,7 +19,7 @@ export const getCurrentGame = async (transaction: Transaction | undefined = unde
         data = doc.data() as Game;
     }
 
-    if (!doc || !data || data.opensAt > now) {
+    if (!doc || !data || data.opensAt.toDate() > now) {
         return Promise.reject({ message: 'No current game.' });
     }
 
