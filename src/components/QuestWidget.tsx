@@ -31,8 +31,10 @@ export const QuestWidget = () => {
                         {"Gladiator's Arena"}
                     </Typography>
 
+                    <Typography variant="subtitle1">{'Multiplier: 100%'}</Typography>
+
                     <Typography variant="subtitle1" mb={2}>
-                        {'Multiplier: 100%'}
+                        {'Prerequisites: None'}
                     </Typography>
 
                     <Typography variant="body1">
