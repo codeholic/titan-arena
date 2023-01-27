@@ -1,4 +1,4 @@
-import { Box, CardMedia, CardMediaProps, Skeleton, styled } from '@mui/material';
+import { Box, CardMedia, CardMediaProps, Skeleton, styled, useTheme } from '@mui/material';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
 
 import { Nft, Quest } from '../lib/types';
@@ -43,10 +43,50 @@ const NftCardMedia = styled(CardMedia, {
         : { cursor: 'pointer' }),
 }));
 
+interface NftCardContentProps {
+    quest?: Quest;
+}
+
+const NftCardContent = ({ quest }: NftCardContentProps) => (
+    <>
+        {quest?.startedAt && (
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: '20px',
+                }}
+            >
+                Questing
+            </Box>
+        )}
+
+        {quest?.points && (
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    margin: 1,
+                    px: 1,
+                    borderRadius: 1,
+                    backgroundColor: quest?.startedAt ? 'rgba(56, 161, 105, 0.7)' : 'rgba(49, 130, 206, 0.7)',
+                }}
+            >
+                {!quest?.startedAt && '+'}
+                {quest.points}
+            </Box>
+        )}
+    </>
+);
+
 const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
     ({ name, setValue, nft, defaultChecked, isSubmitting, quest }, ref) => {
         const [isLoading, setIsLoading] = useState(true);
         const [checked, setChecked] = useState(false);
+        const theme = useTheme();
 
         useEffect(() => {
             const image = new Image();
@@ -82,42 +122,27 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                         }
                     }}
                 >
-                    {quest?.startedAt && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                fontSize: '20px',
-                            }}
-                        >
-                            Questing
-                        </Box>
-                    )}
-
-                    {quest?.points && (
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                margin: 1,
-                                px: 1,
-                                borderRadius: 1,
-                                backgroundColor: quest?.startedAt
-                                    ? 'rgba(56, 161, 105, 0.7)'
-                                    : 'rgba(49, 130, 206, 0.7)',
-                            }}
-                        >
-                            {!quest?.startedAt && '+'}
-                            {quest.points}
-                        </Box>
-                    )}
+                    <NftCardContent quest={quest} />
                 </NftCardMedia>
             </>
         ) : (
-            <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />
+            <Box position="relative" sx={{ fontFamily: theme.typography.button.fontFamily }}>
+                <NftCardContent quest={quest} />
+
+                <Skeleton
+                    variant="rounded"
+                    sx={{
+                        paddingTop: '100%',
+                        ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
+                        ...(quest && !quest?.startedAt ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
+                    }}
+                    onClick={() => {
+                        if (!isDisabled) {
+                            setChecked(!checked);
+                        }
+                    }}
+                />
+            </Box>
         );
     }
 );
