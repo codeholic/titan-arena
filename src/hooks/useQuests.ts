@@ -4,7 +4,7 @@ import useSWR from 'swr';
 
 import { Nft, Quest } from '../lib/types';
 
-export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; isLoading: boolean } => {
+export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; isLoading: boolean; mutate: Function } => {
     const fetcher = (url: string, mints: string[]) =>
         fetch(url, {
             method: 'POST',
@@ -14,7 +14,7 @@ export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; isLoa
 
     const mints = useMemo(() => nfts?.map(({ mint }) => mint), [nfts]);
 
-    const { data, isLoading } = useSWR(!!nfts?.length && ['/api/getQuests', mints], ([url, mints]) => {
+    const { data, isLoading, mutate } = useSWR(!!nfts?.length && ['/api/getQuests', mints], ([url, mints]) => {
         return !!mints && fetcher(url, mints);
     });
 
@@ -27,5 +27,5 @@ export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; isLoa
         return mints.reduce((result, mint, index) => ({ [mint]: questArray[index], ...result }), {});
     }, [mints, questArray]);
 
-    return { quests, isLoading };
+    return { quests, isLoading, mutate };
 };

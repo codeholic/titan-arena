@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import React, { createContext, useMemo } from 'react';
+import React, { createContext, useCallback, useMemo } from 'react';
 
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
@@ -18,6 +18,7 @@ export type DataContextProps = {
     quests?: Record<string, Quest>;
     clans?: Clan[];
     currentGame?: Game;
+    reload: Function;
 };
 
 export const DataContext = createContext({
@@ -29,15 +30,22 @@ export const DataContext = createContext({
 } as DataContextProps);
 
 const Home: NextPage = () => {
-    const { nfts, isLoading: areNftsLoading } = useNfts();
-    const { quests, isLoading: areQuestsLoading } = useQuests(nfts);
-    const { currentGame, isLoading: isCurrentGameLoading } = useCurrentGame();
-    const { clans, isLoading: areClansLoading } = useClans();
+    const { nfts, isLoading: areNftsLoading, reload: reloadNfts } = useNfts();
+    const { quests, isLoading: areQuestsLoading, mutate: reloadQuests } = useQuests(nfts);
+    const { currentGame, isLoading: isCurrentGameLoading, mutate: reloadCurrentGame } = useCurrentGame();
+    const { clans, isLoading: areClansLoading, mutate: reloadClans } = useClans();
 
     const isLoading = useMemo(
         () => areNftsLoading || areQuestsLoading || isCurrentGameLoading || areClansLoading,
         [areNftsLoading, areQuestsLoading, isCurrentGameLoading, areClansLoading]
     );
+
+    const reload = useCallback(() => {
+        reloadNfts();
+        reloadQuests();
+        reloadCurrentGame();
+        reloadClans();
+    }, [reloadNfts, reloadQuests, reloadCurrentGame, reloadClans]);
 
     return (
         <>
@@ -54,9 +62,9 @@ const Home: NextPage = () => {
                     sx={{ maxWidth: { lg: '500px', xs: '50%' }, mx: 'auto', my: { lg: '40px', xs: '25px' } }}
                 />
 
-                <Navbar />
+                <DataContext.Provider value={{ isLoading, nfts, quests, clans, currentGame, reload }}>
+                    <Navbar />
 
-                <DataContext.Provider value={{ isLoading, nfts, quests, clans, currentGame }}>
                     <ClanCardList />
 
                     <QuestWidget />

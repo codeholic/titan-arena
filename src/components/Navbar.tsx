@@ -5,7 +5,6 @@ import { Box, Stack } from '@mui/material';
 
 import BackIcon from '@mui/icons-material/Reply';
 import CupIcon from '@mui/icons-material/EmojiEvents';
-import VestingIcon from '@mui/icons-material/AccountBalance';
 
 const WalletMultiButtonDynamic = dynamic(
     async () => (await import('@solana/wallet-adapter-material-ui')).WalletMultiButton,
@@ -13,6 +12,7 @@ const WalletMultiButtonDynamic = dynamic(
 );
 
 import { MenuItem, MenuItemProps } from './MenuItem';
+import { ReloadButton } from './ReloadButton';
 
 export const Navbar = () => {
     const menuItemProps: MenuItemProps[] = [
@@ -52,9 +52,11 @@ export const Navbar = () => {
                 );
             })}
 
-            <Box>
+            <Stack direction="row" spacing={1}>
+                <ReloadButton />
+
                 <WalletMultiButtonDynamic />
-            </Box>
+            </Stack>
         </Stack>
     );
 };

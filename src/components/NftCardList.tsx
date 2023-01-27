@@ -2,7 +2,6 @@ import CheckboxCheckedIcon from '@mui/icons-material/CheckBox';
 import CheckboxBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import {
     Box,
-    BoxProps,
     Button,
     CircularProgress,
     Dialog,
@@ -10,37 +9,25 @@ import {
     Grid,
     Skeleton,
     Stack,
-    styled,
     ToggleButton,
     useMediaQuery,
     useTheme,
 } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { DataContext } from '../pages';
 import NftCard from './NftCard';
-import { Message, PublicKey, Transaction } from '@solana/web3.js';
+import { Message, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
 import { BuildPaymentResult } from '../pages/api/buildPayment';
-
-const InfoBox = styled(Box)<BoxProps>(({ theme }) => ({
-    margin: '20px 0',
-    padding: '50px',
-    boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
-    borderRadius: '5px',
-    fontFamily: theme.typography.button.fontFamily,
-    fontSize: '20px',
-    textTransform: 'uppercase',
-    textAlign: 'center',
-}));
 
 export const NftCardList = () => {
     const wallet = useWallet();
     const theme = useTheme();
 
     const { control, register, handleSubmit, setValue } = useForm();
-    const { nfts, quests, currentGame, isLoading } = useContext(DataContext);
+    const { nfts, quests } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 
@@ -147,11 +134,7 @@ export const NftCardList = () => {
             .finally(() => setIsSubmitting(false)); // TODO: refresh
     };
 
-    return !wallet.connected ? (
-        <InfoBox>Connect your wallet to view baby titans.</InfoBox>
-    ) : !isLoading && nfts?.length === 0 ? (
-        <InfoBox>No baby titans owned.</InfoBox>
-    ) : (
+    return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box my={2}>
                 <ToggleButton

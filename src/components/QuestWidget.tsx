@@ -1,14 +1,31 @@
-import { Box, Typography } from '@mui/material';
+import { Box, BoxProps, styled, Typography } from '@mui/material';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
 import { DataContext } from '../pages';
 import { NftCardList } from './NftCardList';
 
+const InfoBox = styled(Box)<BoxProps>(({ theme }) => ({
+    margin: '20px 0',
+    padding: '50px',
+    boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
+    borderRadius: '5px',
+    fontFamily: theme.typography.button.fontFamily,
+    fontSize: '20px',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+}));
+
 export const QuestWidget = () => {
-    const { quests } = useContext(DataContext);
+    const wallet = useWallet();
+    const { nfts, isLoading } = useContext(DataContext);
 
     return (
         <>
-            {quests && (
+            {!wallet.connected ? (
+                <InfoBox>Connect your wallet to view baby titans.</InfoBox>
+            ) : !isLoading && nfts?.length === 0 ? (
+                <InfoBox>No baby titans owned.</InfoBox>
+            ) : (
                 <Box my={2} p={4} sx={{ boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)', borderRadius: '5px' }}>
                     <Typography variant="h2" sx={{ lineHeight: '100%' }}>
                         {"Gladiator's Arena"}
