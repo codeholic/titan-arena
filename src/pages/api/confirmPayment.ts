@@ -2,8 +2,8 @@ import { sha512 } from '@noble/hashes/sha512';
 import { Connection, Message, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { getFirestore, getCurrentGame, getNfts, getQuests } from '../../lib/queries';
-import { Error, Nft } from '../../lib/types';
+import { getFirestore, getCurrentGame, getNfts, getQuests, getClans, calculateReward } from '../../lib/queries';
+import { Clan, Error, Nft } from '../../lib/types';
 import { getOwnedTokenMints } from '../../lib/utils';
 
 type ConfirmPaymentParams = {
@@ -31,6 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         {}
     );
 
+    if (params.mints.some((mint) => !allNfts[mint])) {
+        res.status(400).json({ message: 'Unknown mints.' });
+    }
+
     const solanaTx = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
     if (!solanaTx.feePayer) {
         res.status(400).json({ message: 'Invalid transaction.' });
@@ -41,33 +45,73 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const ownedTokenMints = await getOwnedTokenMints({ connection, owner: solanaTx.feePayer! });
 
-    if (params.mints.some((mint) => !allNfts[mint] || !ownedTokenMints[mint])) {
-        res.status(400).json({ message: 'Wrong mints.' });
+    if (params.mints.some((mint) => !ownedTokenMints[mint])) {
+        res.status(400).json({ message: 'Unauthorized user.' });
     }
 
     const db = getFirestore();
 
     await db
-        .runTransaction(async (transaction) => {
-            const { ref: currentGameRef, data: currentGame } = await getCurrentGame(transaction);
-            const quests = await getQuests(currentGameRef, params.mints, transaction);
+        .runTransaction((transaction) =>
+            getCurrentGame(transaction).then(({ ref: currentGameRef, data: currentGame }) =>
+                getQuests(currentGameRef, params.mints, transaction)
+                    .then((quests) => {
+                        if (!!Object.keys(quests).length) {
+                            return Promise.reject({ message: 'Duplicate quests.' });
+                        }
 
-            if (!!Object.keys(quests).length) {
-                return Promise.reject({ message: 'Duplicate quests.' });
-            }
+                        solanaTx.addSignature(solanaTx.feePayer!, Buffer.from(params.signature, 'base64'));
 
-            res.status(200).json({});
-        })
+                        return connection
+                            .sendRawTransaction(solanaTx.serialize())
+                            .then((signature) =>
+                                connection
+                                    .getLatestBlockhash()
+                                    .then((latestBlockhash) =>
+                                        connection.confirmTransaction({ signature, ...latestBlockhash })
+                                    )
+                            );
+                    })
+                    .then(async () => {
+                        const clanMap = (await getClans(transaction)).reduce(
+                            (result: Record<string, Clan>, clan) => ({ [clan.name]: clan, ...result }),
+                            {}
+                        );
+
+                        const startedAt = new Date();
+
+                        const deltas = await Promise.all(
+                            params.mints.map((mint) => {
+                                const ref = db.collection('quests').doc();
+
+                                const { clan } = allNfts[mint];
+                                const points = calculateReward(currentGame, clanMap[clan]);
+
+                                transaction.create(ref, {
+                                    game: currentGameRef,
+                                    isRewardClaimed: false,
+                                    mint,
+                                    points,
+                                    startedAt,
+                                });
+
+                                return { clan: clan.toLowerCase(), points };
+                            })
+                        );
+
+                        const { questCounts, scores } = currentGame;
+
+                        deltas.forEach(({ clan, points }) => {
+                            questCounts[clan]++;
+                            scores[clan] += points;
+                        });
+
+                        return transaction.update(currentGameRef, { questCounts, scores });
+                    })
+                    .then(() => {
+                        res.status(200).json({});
+                    })
+            )
+        )
         .catch(({ message }) => res.status(422).json({ message }));
-
-    // transaction.addSignature(transaction.feePayer!, Buffer.from(params.signature, 'base64'));
-
-    // await connection
-    //     .sendRawTransaction(transaction.serialize())
-    //     .then((signature) =>
-    //         connection
-    //             .getLatestBlockhash()
-    //             .then((latestBlockhash) => connection.confirmTransaction({ signature, ...latestBlockhash }))
-    //     )
-    //     .then(() => res.status(200).json({}));
 }

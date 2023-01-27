@@ -15,7 +15,9 @@ export const getFirestore = () => {
     return origGetFirestore();
 };
 
-export const getCurrentGame = async (transaction: Transaction | undefined = undefined) => {
+export const getCurrentGame = async (
+    transaction: Transaction | undefined = undefined
+): Promise<{ ref: DocumentReference; data: Game }> => {
     const db = getFirestore();
 
     const now = new Date();

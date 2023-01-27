@@ -26,8 +26,8 @@ export const NftCardList = () => {
     const wallet = useWallet();
     const theme = useTheme();
 
-    const { control, register, handleSubmit, setValue } = useForm();
-    const { nfts, quests } = useContext(DataContext);
+    const { control, register, handleSubmit, setValue, reset } = useForm();
+    const { nfts, quests, reload } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 
@@ -120,18 +120,26 @@ export const NftCardList = () => {
                                           .json()
                                           .catch(() => Promise.reject({ message: 'Internal server error.' }))
                                           .then((result) => {
+                                              console.log('foo');
                                               if (!data.ok) {
                                                   return Promise.reject(result);
                                               }
+
+                                              console.log('bar');
+                                              toast.success(`${mints.length} titans embarked on a quest!`);
+
+                                              setIsSubmitting(false);
+                                              reset({ nfts: {} });
                                           })
                                   )
                         );
-
-                        // TODO: display spinner and success message
                     })
             )
             .catch((err) => toast.error(err.message))
-            .finally(() => setIsSubmitting(false)); // TODO: refresh
+            .finally(() => {
+                setIsSubmitting(false);
+                reload();
+            });
     };
 
     return (

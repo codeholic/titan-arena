@@ -95,7 +95,7 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
             image.onload = () => setIsLoading(false);
         });
 
-        useEffect(() => setValue(name, checked), [name, checked, setValue]);
+        useEffect(() => setValue(name, checked && !quest?.startedAt), [name, checked, setValue, quest]);
 
         useEffect(() => setChecked(defaultChecked), [defaultChecked]);
 
