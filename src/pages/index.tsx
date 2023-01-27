@@ -4,13 +4,13 @@ import React, { createContext, useMemo } from 'react';
 
 import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
-import { NftCardList } from '../components/NftCardList';
 import { useNfts } from '../hooks/useNfts';
 import { Clan, Game, Nft, Quest } from '../lib/types';
 import { useQuests } from '../hooks/useQuests';
 import { useCurrentGame } from '../hooks/useCurrentGame';
 import { ClanCardList } from '../components/ClanCardList';
 import { useClans } from '../hooks/useClans';
+import { QuestWidget } from '../components/QuestWidget';
 
 export type DataContextProps = {
     isLoading: boolean;
@@ -59,7 +59,7 @@ const Home: NextPage = () => {
                 <DataContext.Provider value={{ isLoading, nfts, quests, clans, currentGame }}>
                     <ClanCardList />
 
-                    <NftCardList />
+                    <QuestWidget />
                 </DataContext.Provider>
             </Container>
         </>

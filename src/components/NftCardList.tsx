@@ -185,7 +185,7 @@ export const NftCardList = () => {
             </Grid>
 
             {nfts && (
-                <Box my={2}>
+                <Box mt={2}>
                     <Button
                         type="submit"
                         variant="contained"

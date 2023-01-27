@@ -43,6 +43,14 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
                 fontSize: '16px',
                 letterSpacing: 2,
             },
+            h2: {
+                fontFamily: teko,
+                textTransform: 'uppercase',
+                letterSpacing: 2,
+            },
+            subtitle1: {
+                fontStyle: 'italic',
+            },
         },
         components: {
             MuiLink: {
