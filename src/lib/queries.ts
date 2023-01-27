@@ -59,7 +59,7 @@ export const getQuests = async (
 export const getClans = async (transaction: Transaction | undefined = undefined) => {
     const db = getFirestore();
 
-    const query = db.collection('clans');
+    const query = db.collection('clans').orderBy('position');
     const querySnapshot = await (transaction ? transaction.get(query) : query.get());
 
     return querySnapshot.docs.map((doc) => doc.data() as Clan);

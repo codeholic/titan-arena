@@ -14,19 +14,12 @@ export type Nft = {
     rank?: number;
 };
 
-export type GameStats = {
-    medusa: number;
-    seamonster: number;
-    zeus: number;
-    hades: number;
-};
-
 export type Game = {
     opensAt: Timestamp;
     startsAt: Timestamp;
     endsAt: Timestamp;
-    scores: GameStats;
-    questCounts: GameStats;
+    scores: Record<string, number>;
+    questCounts: Record<string, number>;
 };
 
 export type Quest = {
@@ -40,6 +33,7 @@ export type Clan = {
     name: string;
     multiplier: number;
     nftCount: number;
+    position: number;
 };
 
 export type Error = {

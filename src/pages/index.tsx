@@ -6,13 +6,15 @@ import { CardMedia, Container } from '@mui/material';
 import { Navbar } from '../components/Navbar';
 import { NftCardList } from '../components/NftCardList';
 import { useNfts } from '../hooks/useNfts';
-import { Game, Nft, Quest } from '../lib/types';
+import { Clan, Game, Nft, Quest } from '../lib/types';
 import { useQuests } from '../hooks/useQuests';
+import { ClanCardList } from '../components/ClanCardList';
 
 export type DataContextProps = {
     isLoading: boolean;
     nfts?: Nft[];
     quests?: Record<string, Quest>;
+    clans?: Clan[];
     currentGame?: Game;
 };
 
@@ -20,12 +22,13 @@ export const DataContext = createContext({
     isLoading: false,
     nfts: undefined,
     quests: undefined,
+    clans: undefined,
     currentGame: undefined,
 } as DataContextProps);
 
 const Home: NextPage = () => {
     const { nfts, isLoading: areNftsLoading } = useNfts();
-    const { quests, currentGame, isLoading: areQuestsLoading } = useQuests(nfts);
+    const { quests, clans, currentGame, isLoading: areQuestsLoading } = useQuests(nfts);
 
     const isLoading = useMemo(() => areNftsLoading || areQuestsLoading, [areNftsLoading, areQuestsLoading]);
 
@@ -46,7 +49,9 @@ const Home: NextPage = () => {
 
                 <Navbar />
 
-                <DataContext.Provider value={{ isLoading, nfts, quests, currentGame }}>
+                <DataContext.Provider value={{ isLoading, nfts, quests, clans, currentGame }}>
+                    <ClanCardList />
+
                     <NftCardList />
                 </DataContext.Provider>
             </Container>

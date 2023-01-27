@@ -10,6 +10,7 @@ type GetQuestsParams = {
 type GetQuestsResult = {
     currentGame: Game;
     quests: Quest[];
+    clans: Clan[];
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<GetQuestsResult | Error>) {
@@ -18,13 +19,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const { ref: currentGameRef, data: currentGame } = await getCurrentGame();
     const quests = await getQuests(currentGameRef, mints);
     const nfts: Record<string, Nft> = (await getNfts()).reduce((result, nft) => ({ [nft.mint]: nft, ...result }), {});
-    const clans: Record<string, Clan> = (await getClans()).reduce(
-        (result, clan) => ({ [clan.name]: clan, ...result }),
-        {}
-    );
+    const clans: Clan[] = await getClans();
+    const clanMap: Record<string, Clan> = clans.reduce((result, clan) => ({ [clan.name]: clan, ...result }), {});
 
     res.status(200).json({
         currentGame,
+        clans,
         quests: mints.map((mint) => {
             if (quests[mint]) {
                 const { points, startedAt } = quests[mint];
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                 return { mint, points, startedAt };
             }
 
-            return { mint, points: calculateReward(currentGame, clans[nfts[mint].clan]) };
+            return { mint, points: calculateReward(currentGame, clanMap[nfts[mint].clan]) };
         }),
     });
 }
