@@ -25,11 +25,14 @@ export const getCurrentGame = async (transaction: Transaction | undefined = unde
     let doc, data;
 
     if (!querySnapshot.empty) {
-        [doc] = querySnapshot.docs;
-        data = doc.data() as Game;
+        doc = querySnapshot.docs.find((doc) => {
+            data = doc.data();
+
+            return data.opensAt.toDate() <= now;
+        });
     }
 
-    if (!doc || !data || data.opensAt.toDate() > now) {
+    if (!doc || !data) {
         return Promise.reject({ message: 'No current game.' });
     }
 
