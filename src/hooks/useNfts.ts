@@ -3,6 +3,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import fetch from 'node-fetch';
 import { useCallback, useEffect, useState } from 'react';
 import useSWR from 'swr';
+import { getOwnedTokenMints } from '../lib/utils';
 
 import { Nft } from '../lib/types';
 
@@ -16,7 +17,7 @@ export const useNfts = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [nfts, setNfts] = useState<Nft[] | undefined>(undefined);
 
-    const reload = useCallback(() => {
+    const reload = useCallback(async () => {
         if (!wallet.connected || !wallet.publicKey || !nftData) {
             setIsLoading(false);
             setNfts(undefined);
@@ -25,21 +26,9 @@ export const useNfts = () => {
 
         setIsLoading(true);
 
-        (async () =>
-            await connection
-                .getParsedTokenAccountsByOwner(wallet.publicKey!, { programId: TOKEN_PROGRAM_ID })
-                .then(({ value }) => {
-                    const mints: any = value.reduce(
-                        (result, tokenAccount) => ({
-                            ...result,
-                            [tokenAccount.account.data.parsed.info.mint]: true,
-                        }),
-                        {}
-                    );
-
-                    setNfts(nftData.filter(({ mint }: any) => mints[mint]));
-                })
-                .finally(() => setIsLoading(false)))();
+        await getOwnedTokenMints({ connection, owner: wallet.publicKey! })
+            .then((ownedTokenMints) => setNfts(nftData.filter(({ mint }: any) => ownedTokenMints[mint])))
+            .finally(() => setIsLoading(false));
     }, [wallet.connected, wallet.publicKey, nftData, connection]);
 
     useEffect(() => {
