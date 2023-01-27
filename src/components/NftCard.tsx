@@ -25,7 +25,6 @@ const NftCardMedia = styled(CardMedia, {
     position: 'relative',
     color: '#F7FAFC',
     fontFamily: theme.typography.button.fontFamily,
-    fontSize: '20px',
     textTransform: 'uppercase',
     ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
     ...(isDisabled
@@ -84,8 +83,35 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                     }}
                 >
                     {quest?.startedAt && (
-                        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '20px',
+                            }}
+                        >
                             Questing
+                        </Box>
+                    )}
+
+                    {quest?.points && (
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                margin: 1,
+                                px: 1,
+                                borderRadius: 1,
+                                backgroundColor: quest?.startedAt
+                                    ? 'rgba(56, 161, 105, 0.7)'
+                                    : 'rgba(49, 130, 206, 0.7)',
+                            }}
+                        >
+                            {!quest?.startedAt && '+'}
+                            {quest.points}
                         </Box>
                     )}
                 </NftCardMedia>
