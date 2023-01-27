@@ -5,7 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getFirestore } from 'firebase-admin/firestore';
 
 import { getCurrentGame, getNfts, getQuests } from '../../lib/queries';
-import { Nft } from '../../lib/types';
+import { Error, Nft } from '../../lib/types';
 
 type ConfirmPaymentParams = {
     mints: string[];
@@ -16,14 +16,7 @@ type ConfirmPaymentParams = {
 
 export type ConfirmPaymentResult = {};
 
-export type ConfirmPaymentError = {
-    message: string;
-};
-
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse<ConfirmPaymentResult | ConfirmPaymentError>
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ConfirmPaymentResult | Error>) {
     const params: ConfirmPaymentParams = req.body;
 
     const salt = process.env.TRANSACTION_MESSAGE_CHECKSUM_SALT!;
@@ -49,6 +42,10 @@ export default async function handler(
         .runTransaction(async (transaction) => {
             const { ref: currentGameRef, data: currentGame } = await getCurrentGame(transaction);
             const quests = await getQuests(currentGameRef, params.mints, transaction);
+
+            if (!!Object.keys(quests).length) {
+                return Promise.reject({ message: 'Duplicate quests.' });
+            }
 
             console.log(currentGame);
             console.log(quests);

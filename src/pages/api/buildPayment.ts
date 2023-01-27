@@ -2,6 +2,7 @@ import { sha512 } from '@noble/hashes/sha512';
 import { createTransferCheckedInstruction } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, /* SystemProgram, */ Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { Error } from '../../lib/types';
 import { findAssociatedAddress } from '../../lib/utils';
 
 type BuildPaymentParams = {
@@ -14,16 +15,9 @@ export type BuildPaymentResult = {
     checksum: string;
 };
 
-export type BuildPaymentError = {
-    message: string;
-};
-
 const LAMPORTS_PER_NFT = BigInt('10000000');
 
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse<BuildPaymentResult | BuildPaymentError>
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse<BuildPaymentResult | Error>) {
     const params: BuildPaymentParams = req.body;
 
     const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);

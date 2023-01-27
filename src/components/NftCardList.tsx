@@ -13,10 +13,10 @@ import {
     useMediaQuery,
     useTheme,
 } from '@mui/material';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { useContext, useMemo, useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { NftsContext } from '../pages';
+import { DataContext } from '../pages';
 import NftCard from './NftCard';
 import { Message, PublicKey, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
@@ -24,11 +24,10 @@ import { BuildPaymentResult } from '../pages/api/buildPayment';
 
 export const NftCardList = () => {
     const wallet = useWallet();
-    const { connection } = useConnection();
     const theme = useTheme();
 
     const { control, register, handleSubmit, setValue } = useForm();
-    const { nfts, isLoading } = useContext(NftsContext);
+    const { nfts, quests, currentGame, isLoading } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 

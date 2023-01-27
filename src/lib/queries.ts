@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import { getFirestore, Transaction, DocumentReference } from 'firebase-admin/firestore';
 import path from 'path';
 
-import { Nft } from './types';
+import { Clan, Game, Nft, Quest } from './types';
 import { chunks } from './utils';
 
 export const getCurrentGame = async (transaction: Transaction | undefined = undefined) => {
@@ -16,7 +16,7 @@ export const getCurrentGame = async (transaction: Transaction | undefined = unde
 
     if (!querySnapshot.empty) {
         [doc] = querySnapshot.docs;
-        data = doc.data();
+        data = doc.data() as Game;
     }
 
     if (!doc || !data || data.opensAt > now) {
@@ -38,7 +38,7 @@ export const getQuests = async (
     gameRef: DocumentReference,
     mints: string[],
     transaction: Transaction | undefined = undefined
-) => {
+): Promise<Record<string, Quest>> => {
     const db = getFirestore();
 
     return (
@@ -54,4 +54,23 @@ export const getQuests = async (
         (result, chunk) => ({ ...chunk.reduce((result, data) => ({ [data.mint]: data, ...result }), {}), ...result }),
         {}
     );
+};
+
+export const getClans = async (transaction: Transaction | undefined = undefined) => {
+    const db = getFirestore();
+
+    const query = db.collection('clans');
+    const querySnapshot = await (transaction ? transaction.get(query) : query.get());
+
+    return querySnapshot.docs.map((doc) => doc.data() as Clan);
+};
+
+export const BASE_POINTS = 100;
+
+export const calculateReward = (game: Game, clan: Clan) => {
+    const now = Date.now() / 1000;
+    const durationMultiplier =
+        game.startsAt.seconds > now ? 1 : (game.endsAt.seconds - now) / (game.endsAt.seconds - game.startsAt.seconds);
+
+    return Math.ceil(BASE_POINTS * clan.multiplier * durationMultiplier);
 };
