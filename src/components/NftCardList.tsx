@@ -42,7 +42,7 @@ export const NftCardList = () => {
             return;
         }
 
-        return Object.values(selectedNfts).every((value) => value);
+        return Object.entries(selectedNfts).every(([key, value]) => value || (quests && !!quests?.[key]?.startedAt));
     }, [nfts, selectedNfts]);
 
     const toggleAll = (selected: boolean) => {
@@ -52,7 +52,10 @@ export const NftCardList = () => {
 
         setValue(
             'nfts',
-            nfts.reduce((result, { mint }) => ({ [mint]: selected, ...result }), {})
+            nfts.reduce(
+                (result, { mint }) => ({ [mint]: selected && !!quests?.[mint] && !quests[mint].startedAt, ...result }),
+                {}
+            )
         );
     };
 
