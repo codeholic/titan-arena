@@ -14,7 +14,7 @@ import {
     useTheme,
 } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { DataContext } from '../pages';
 import NftCard from './NftCard';
@@ -37,27 +37,34 @@ export const NftCardList = () => {
 
     const columns = largeScreen ? 8 : mediumScreen ? 6 : smallScreen ? 4 : 2;
 
+    const enabledNfts = useMemo(
+        () =>
+            !nfts || !quests
+                ? {}
+                : nfts.reduce(
+                      (result: Record<string, boolean>, { mint }) =>
+                          quests[mint].startedAt ? result : { [mint]: true, ...result },
+                      {}
+                  ),
+        [nfts, quests]
+    );
+
     const allSelected = useMemo(() => {
-        if (!nfts) {
-            return;
-        }
+        const enabledMints = Object.keys(enabledNfts);
 
-        return Object.entries(selectedNfts).every(([key, value]) => value || (quests && !!quests?.[key]?.startedAt));
-    }, [nfts, selectedNfts]);
+        return !!enabledMints.length && enabledMints.every((mint) => selectedNfts[mint]);
+    }, [enabledNfts, selectedNfts]);
 
-    const toggleAll = (selected: boolean) => {
-        if (!nfts) {
-            return;
-        }
+    const toggleAll = useCallback(
+        (selected: boolean) => {
+            if (!Object.keys(enabledNfts).length) {
+                return;
+            }
 
-        setValue(
-            'nfts',
-            nfts.reduce(
-                (result, { mint }) => ({ [mint]: selected && !!quests?.[mint] && !quests[mint].startedAt, ...result }),
-                {}
-            )
-        );
-    };
+            setValue('nfts', selected ? enabledNfts : {});
+        },
+        [enabledNfts, setValue]
+    );
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const mints = Object.entries(selectedNfts).reduce(
@@ -134,7 +141,12 @@ export const NftCardList = () => {
     ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box my={2}>
-                <ToggleButton value="" selected={allSelected} onChange={() => toggleAll(!allSelected)}>
+                <ToggleButton
+                    value=""
+                    selected={allSelected}
+                    onChange={() => toggleAll(!allSelected)}
+                    disabled={!Object.keys(enabledNfts).length}
+                >
                     {allSelected ? <CheckboxCheckedIcon sx={{ mr: 1 }} /> : <CheckboxBlankIcon sx={{ mr: 1 }} />}
                     Select all
                 </ToggleButton>
@@ -161,7 +173,11 @@ export const NftCardList = () => {
 
             {nfts && (
                 <Box my={2}>
-                    <Button type="submit" variant="contained" disabled={isSubmitting}>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSubmitting || !Object.keys(enabledNfts).length}
+                    >
                         Submit
                     </Button>
                 </Box>
