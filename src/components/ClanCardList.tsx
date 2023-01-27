@@ -1,4 +1,4 @@
-import { Box, CardMedia, Grid, Stack, useTheme } from '@mui/material';
+import { CardMedia, Grid, useTheme } from '@mui/material';
 import { useContext } from 'react';
 import { DataContext } from '../pages';
 

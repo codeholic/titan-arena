@@ -2,11 +2,9 @@ import fetch from 'node-fetch';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
-import { Clan, Game, Nft, Quest } from '../lib/types';
+import { Clan, Nft, Quest } from '../lib/types';
 
-export const useQuests = (
-    nfts?: Nft[]
-): { quests?: Record<string, Quest>; clans?: Clan[]; currentGame?: Game; isLoading: boolean } => {
+export const useQuests = (nfts?: Nft[]): { quests?: Record<string, Quest>; clans?: Clan[]; isLoading: boolean } => {
     const fetcher = (url: string, mints: string[]) =>
         fetch(url, {
             method: 'POST',
@@ -20,7 +18,7 @@ export const useQuests = (
         return !!mints && fetcher(url, mints);
     });
 
-    const { quests: questArray, clans, currentGame } = data || {};
+    const { quests: questArray, clans } = data || {};
     const quests = useMemo(() => {
         if (!mints || !questArray) {
             return;
@@ -29,5 +27,5 @@ export const useQuests = (
         return mints.reduce((result, mint, index) => ({ [mint]: questArray[index], ...result }), {});
     }, [mints, questArray]);
 
-    return { quests, clans, currentGame, isLoading };
+    return { quests, clans, isLoading };
 };
