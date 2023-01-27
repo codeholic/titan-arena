@@ -126,7 +126,7 @@ export const NftCardList = () => {
                                               }
 
                                               console.log('bar');
-                                              toast.success(`${mints.length} titans embarked on a quest!`);
+                                              toast.success('Titans have embarked on a quest!');
 
                                               setIsSubmitting(false);
                                               reset({ nfts: {} });
@@ -191,7 +191,7 @@ export const NftCardList = () => {
                 <DialogContent>
                     <Stack direction="row" spacing={1} display="flex" alignItems="center">
                         <CircularProgress size={20} />
-                        <Box>Sending {mints.length} titans on a quest...</Box>
+                        <Box>Sending {mints.length > 1 ? `${mints.length} titans` : 'a titan'} on a quest&hellip;</Box>
                     </Stack>
                 </DialogContent>
             </Dialog>
