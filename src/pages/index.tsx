@@ -10,6 +10,7 @@ import { Clan, Game, Nft, Quest } from '../lib/types';
 import { useQuests } from '../hooks/useQuests';
 import { useCurrentGame } from '../hooks/useCurrentGame';
 import { ClanCardList } from '../components/ClanCardList';
+import { useClans } from '../hooks/useClans';
 
 export type DataContextProps = {
     isLoading: boolean;
@@ -29,12 +30,13 @@ export const DataContext = createContext({
 
 const Home: NextPage = () => {
     const { nfts, isLoading: areNftsLoading } = useNfts();
-    const { quests, clans, isLoading: areQuestsLoading } = useQuests(nfts);
+    const { quests, isLoading: areQuestsLoading } = useQuests(nfts);
     const { currentGame, isLoading: isCurrentGameLoading } = useCurrentGame();
+    const { clans, isLoading: areClansLoading } = useClans();
 
     const isLoading = useMemo(
-        () => areNftsLoading || areQuestsLoading || isCurrentGameLoading,
-        [areNftsLoading, areQuestsLoading, isCurrentGameLoading]
+        () => areNftsLoading || areQuestsLoading || isCurrentGameLoading || areClansLoading,
+        [areNftsLoading, areQuestsLoading, isCurrentGameLoading, areClansLoading]
     );
 
     return (
