@@ -2,6 +2,7 @@ import CheckboxCheckedIcon from '@mui/icons-material/CheckBox';
 import CheckboxBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import {
     Box,
+    BoxProps,
     Button,
     CircularProgress,
     Dialog,
@@ -9,6 +10,7 @@ import {
     Grid,
     Skeleton,
     Stack,
+    styled,
     ToggleButton,
     useMediaQuery,
     useTheme,
@@ -21,6 +23,17 @@ import NftCard from './NftCard';
 import { Message, PublicKey, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
 import { BuildPaymentResult } from '../pages/api/buildPayment';
+
+const InfoBox = styled(Box)<BoxProps>(({ theme }) => ({
+    margin: '20px 0',
+    padding: '50px',
+    boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
+    borderRadius: '5px',
+    fontFamily: theme.typography.button.fontFamily,
+    fontSize: '20px',
+    textTransform: 'uppercase',
+    textAlign: 'center',
+}));
 
 export const NftCardList = () => {
     const wallet = useWallet();
@@ -135,9 +148,9 @@ export const NftCardList = () => {
     };
 
     return !wallet.connected ? (
-        <Box my={2}>Connect your wallet to view baby titans.</Box>
+        <InfoBox>Connect your wallet to view baby titans.</InfoBox>
     ) : !isLoading && nfts?.length === 0 ? (
-        <Box my={2}>No baby titans owned.</Box>
+        <InfoBox>No baby titans owned.</InfoBox>
     ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Box my={2}>
