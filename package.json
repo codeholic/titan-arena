@@ -30,7 +30,8 @@
         "clean": "shx rm -rf .next .swc lib",
         "dev": "NODE_OPTIONS='--inspect' next dev",
         "start": "next start",
-        "lint": "prettier --check 'src/{*,**/*}.{ts,tsx,js,jsx,json}' && eslint && next lint"
+        "lint": "prettier --check 'src/{*,**/*}.{ts,tsx,js,jsx,json}' && eslint && next lint",
+        "deploy": "rsync -av --exclude=.next/cache .next .env.local ubuntu@titanarena.dao2go.com:titan-arena/ && ssh ubuntu@titanarena.dao2go.com pm2 restart titanarena"
     },
     "dependencies": {
         "@emotion/react": "^11.10.5",
