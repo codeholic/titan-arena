@@ -120,12 +120,10 @@ export const NftCardList = () => {
                                           .json()
                                           .catch(() => Promise.reject({ message: 'Internal server error.' }))
                                           .then((result) => {
-                                              console.log('foo');
                                               if (!data.ok) {
                                                   return Promise.reject(result);
                                               }
 
-                                              console.log('bar');
                                               toast.success('Titans have embarked on a quest!');
 
                                               setIsSubmitting(false);
