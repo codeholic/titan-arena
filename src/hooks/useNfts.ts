@@ -1,4 +1,3 @@
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import fetch from 'node-fetch';
 import { useCallback, useEffect, useState } from 'react';

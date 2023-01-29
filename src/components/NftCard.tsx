@@ -134,7 +134,7 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                     sx={{
                         paddingTop: '100%',
                         ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
-                        ...(quest && !quest?.startedAt ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
+                        ...(!!quest && !quest?.startedAt ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
                     }}
                     onClick={() => {
                         if (!isDisabled) {
