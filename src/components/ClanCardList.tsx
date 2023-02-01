@@ -41,17 +41,24 @@ export const ClanCardList = () => {
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
-                                Questing:
-                            </Grid>
-                            <Grid item xs={1}>
-                                {[currentGame.questCounts[name.toLowerCase()], nftCount].join('/')}
-                            </Grid>
-
-                            <Grid item xs={1} sx={{ pr: 1 }}>
                                 Multiplier:
                             </Grid>
                             <Grid item xs={1}>
                                 {multiplier * 100}%
+                            </Grid>
+
+                            <Grid item xs={1} sx={{ pr: 1 }}>
+                                Total:
+                            </Grid>
+                            <Grid item xs={1}>
+                                {nftCount}
+                            </Grid>
+
+                            <Grid item xs={1} sx={{ pr: 1 }}>
+                                Questing:
+                            </Grid>
+                            <Grid item xs={1}>
+                                {currentGame.questCounts[name.toLowerCase()]}
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
