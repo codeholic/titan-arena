@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Clan {
+  id          Int     @id @default(autoincrement())
+  multiplier  Float   @default(1.0)
+  name        String  @unique
+  nfts        Nft[]
+  position    Int     @unique
+}
+
+model Game {
+  id        Int       @id @default(autoincrement())
+  endsAt    DateTime
+  opensAt   DateTime
+  startsAt  DateTime
+  quests    Quest[]
+}
+
+model Nft {
+  id        Int @id @default(autoincrement())
+  clan      Clan @relation(fields: [clanId], references: [id])
+  clanId    Int
+  imageUrl  String
+  mint      String
+  name      String @unique
+  traits    Trait[]
+  quests    Quest[]
+}
+
+model Trait {
+  id    Int     @id @default(autoincrement())
+  name  String
+  nft   Nft     @relation(fields: [nftId], references: [id])
+  nftId Int
+  value String
+}
+
+model Quest {
+  id              Int @id @default(autoincrement())
+  game            Game @relation(fields: [gameId], references: [id])
+  gameId          Int
+  isRewardClaimed Boolean @default(false)
+  nft             Nft @relation(fields: [nftId], references: [id])
+  nftId           Int
+  points          Int
+  startsAt        DateTime
+}

@@ -39,3 +39,6 @@ yarn-error.log*
 /lib
 
 /secrets/
+
+/prisma/*.db
+/prisma/*.db-journal
