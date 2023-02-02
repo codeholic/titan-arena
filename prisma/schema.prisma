@@ -31,7 +31,7 @@ model Nft {
   clan      Clan @relation(fields: [clanId], references: [id])
   clanId    Int
   imageUrl  String
-  mint      String
+  mint      String @unique
   name      String @unique
   traits    Trait[]
   quests    Quest[]
@@ -53,5 +53,5 @@ model Quest {
   nft             Nft @relation(fields: [nftId], references: [id])
   nftId           Int
   points          Int
-  startsAt        DateTime
+  startedAt       DateTime
 }

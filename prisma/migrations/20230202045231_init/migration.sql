@@ -40,7 +40,7 @@ CREATE TABLE "Quest" (
     "isRewardClaimed" BOOLEAN NOT NULL DEFAULT false,
     "nftId" INTEGER NOT NULL,
     "points" INTEGER NOT NULL,
-    "startsAt" DATETIME NOT NULL,
+    "startedAt" DATETIME NOT NULL,
     CONSTRAINT "Quest_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "Quest_nftId_fkey" FOREIGN KEY ("nftId") REFERENCES "Nft" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -50,6 +50,9 @@ CREATE UNIQUE INDEX "Clan_name_key" ON "Clan"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Clan_position_key" ON "Clan"("position");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Nft_mint_key" ON "Nft"("mint");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Nft_name_key" ON "Nft"("name");
