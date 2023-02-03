@@ -46,11 +46,15 @@ const env = require('@next/env');
                     opensAt: opensAt.toDate(),
                     startsAt: startsAt.toDate(),
                     endsAt: endsAt.toDate(),
-                    quests: { create: await Promise.all((quests as QuestData[]).map(async ({ isRewardClaimed, mint, startedAt }: QuestData) => {
-                        const nft = await prisma.nft.findUnique({ where: { mint } }) as Nft;
+                    quests: {
+                        create: await Promise.all(
+                            (quests as QuestData[]).map(async ({ isRewardClaimed, mint, startedAt }: QuestData) => {
+                                const nft = (await prisma.nft.findUnique({ where: { mint } })) as Nft;
 
-                        return { isRewardClaimed, nftId: nft.id, startedAt: startedAt.toDate() };
-                    })) },
+                                return { isRewardClaimed, nftId: nft.id, startedAt: startedAt.toDate() };
+                            })
+                        ),
+                    },
                     clanMultipliers: { create: clans.map(({ id: clanId }) => ({ clanId })) },
                 },
             });

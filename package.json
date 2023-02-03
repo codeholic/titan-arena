@@ -51,6 +51,7 @@
         "react-dom": "^18.0.0",
         "react-hook-form": "^7.42.1",
         "react-hot-toast": "^2.4.0",
+        "superjson": "^1.12.2",
         "swr": "^2.0.1",
         "ts-node": "^10.9.1"
     },

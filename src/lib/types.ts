@@ -1,3 +1,4 @@
+import { Clan } from '@prisma/client';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export type Trait = {
@@ -27,13 +28,6 @@ export type Quest = {
     mint: string;
     points: number;
     startedAt?: Date;
-};
-
-export type Clan = {
-    name: string;
-    multiplier: number;
-    nftCount: number;
-    position: number;
 };
 
 export type Error = {
