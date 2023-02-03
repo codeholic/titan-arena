@@ -1,15 +1,23 @@
 import fetch from 'node-fetch';
-import { useMemo } from 'react';
 import useSWR from 'swr';
+import { PublicKey } from '@solana/web3.js';
+import superjson from 'superjson';
 
-import { Game } from '../lib/types';
+import { GetCurrentGameResult } from '../lib/types';
 
-export const useCurrentGame = (): { currentGame?: Game; isLoading: boolean; mutate: Function } => {
-    const fetcher = (url: string) => fetch(url).then((res) => res.json());
+export type UseCurrentGameResult = GetCurrentGameResult & {
+    isLoading: boolean;
+    reload: Function;
+}
 
-    const { data, isLoading, mutate } = useSWR('/api/getCurrentGame', fetcher);
+export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult => {
+    const fetcher = (url: string, player: string | undefined) => fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ player }),
+        headers: { 'Content-Type': 'application/json' },
+    }).then((res) => res.text().then(superjson.parse));
 
-    const { currentGame } = useMemo(() => data || {}, [data]);
+    const { data, isLoading, mutate: reload } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args));
 
-    return { currentGame, isLoading, mutate };
+    return { ...(data || {}), isLoading, reload };
 };

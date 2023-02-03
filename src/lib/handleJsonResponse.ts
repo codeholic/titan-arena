@@ -15,7 +15,8 @@ const handleJsonResponse =
             const [status, body] = await handler({ req });
 
             return res.status(status).send(superjson.stringify(body));
-        } catch (_) {
+        } catch (err) {
+            console.log(err)
             res.status(500).send(superjson.stringify({ message: 'Internal server error.' }));
         }
     };

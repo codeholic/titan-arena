@@ -1,15 +1,13 @@
 import { Box, CardMedia, CardMediaProps, Skeleton, styled, useTheme } from '@mui/material';
+import { Nft, Quest } from '@prisma/client';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
-
-import { Nft, Quest } from '../lib/types';
 
 export type NftCardProps = {
     name: string;
     setValue: Function;
-    nft: Nft;
+    nft: Nft & { quests: Quest[] };
     defaultChecked: boolean;
     isSubmitting: boolean;
-    quest?: Quest;
 };
 
 interface NftCardMediaProps extends CardMediaProps {
@@ -63,7 +61,8 @@ const NftCardContent = ({ quest }: NftCardContentProps) => (
             </Box>
         )}
 
-        {quest?.points && (
+        {
+        /*quest?.points && (
             <Box
                 sx={{
                     position: 'absolute',
@@ -78,12 +77,13 @@ const NftCardContent = ({ quest }: NftCardContentProps) => (
                 {!quest?.startedAt && '+'}
                 {quest.points}
             </Box>
-        )}
+            )*/
+        }
     </>
 );
 
 const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
-    ({ name, setValue, nft, defaultChecked, isSubmitting, quest }, ref) => {
+    ({ name, setValue, nft, defaultChecked, isSubmitting }, ref) => {
         const [isLoading, setIsLoading] = useState(true);
         const [checked, setChecked] = useState(false);
         const theme = useTheme();
@@ -91,15 +91,17 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
         useEffect(() => {
             const image = new Image();
 
-            image.src = nft.image_url;
+            image.src = nft.imageUrl;
             image.onload = () => setIsLoading(false);
         });
 
-        useEffect(() => setValue(name, checked && !quest?.startedAt), [name, checked, setValue, quest]);
+        const isQuesting = useMemo(() => !!nft.quests[0].startedAt, [nft]);
+
+        useEffect(() => setValue(name, checked && !isQuesting), [name, checked, setValue, isQuesting]);
 
         useEffect(() => setChecked(defaultChecked), [defaultChecked]);
 
-        const isDisabled = useMemo(() => isSubmitting || !quest || !!quest.startedAt, [isSubmitting, quest]);
+        const isDisabled = useMemo(() => isSubmitting || isQuesting, [isSubmitting, isQuesting]);
 
         return !isLoading ? (
             <>
@@ -113,7 +115,7 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                     readOnly={true}
                 />
                 <NftCardMedia
-                    image={nft.image_url}
+                    image={nft.imageUrl}
                     checked={checked}
                     isDisabled={isDisabled}
                     onClick={() => {
@@ -122,19 +124,19 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                         }
                     }}
                 >
-                    <NftCardContent quest={quest} />
+                    <NftCardContent quest={nft.quests[0]} />
                 </NftCardMedia>
             </>
         ) : (
             <Box position="relative" sx={{ fontFamily: theme.typography.button.fontFamily }}>
-                <NftCardContent quest={quest} />
+                <NftCardContent quest={nft.quests[0]} />
 
                 <Skeleton
                     variant="rounded"
                     sx={{
                         paddingTop: '100%',
                         ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
-                        ...(!!quest && !quest?.startedAt ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
+                        ...(!!nft.quests[0] && !isQuesting ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
                     }}
                     onClick={() => {
                         if (!isDisabled) {

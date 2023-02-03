@@ -27,7 +27,7 @@ export const NftCardList = () => {
     const theme = useTheme();
 
     const { control, register, handleSubmit, setValue, reset } = useForm();
-    const { nfts, quests, reload } = useContext(DataContext);
+    const { nfts, reload } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 
@@ -39,14 +39,14 @@ export const NftCardList = () => {
 
     const enabledNfts = useMemo(
         () =>
-            !nfts || !quests
+            !nfts
                 ? {}
                 : nfts.reduce(
-                      (result: Record<string, boolean>, { mint }) =>
-                          quests[mint].startedAt ? result : { [mint]: true, ...result },
+                      (result: Record<string, boolean>, { mint, quests }) =>
+                          quests[0]?.startedAt ? result : { [mint]: true, ...result },
                       {}
                   ),
-        [nfts, quests]
+        [nfts]
     );
 
     const allSelected = useMemo(() => {
@@ -164,7 +164,6 @@ export const NftCardList = () => {
                                 {...register(`nfts.${nft.mint}`)}
                                 defaultChecked={!!selectedNfts[nft.mint]}
                                 isSubmitting={isSubmitting}
-                                quest={quests && quests[nft.mint]}
                             />
                         ) : (
                             <Skeleton variant="rounded" sx={{ paddingTop: '100%' }} />

@@ -5,18 +5,18 @@ import { DataContext } from '../pages';
 export const ClanCardList = () => {
     const theme = useTheme();
 
-    const { clans, currentGame } = useContext(DataContext);
+    const { clanStats } = useContext(DataContext);
 
-    if (!clans || !currentGame) {
+    if (!clanStats) {
         return null;
     }
 
     return (
         <Grid container columns={{ xs: 2, md: 4 }} my={1} spacing={2}>
-            {clans.map(({ name, multiplier, nftCount }) => (
-                <Grid key={name} item xs={1}>
+            {clanStats.map(({ clanName, clanMultiplier, total, played, points }) => (
+                <Grid key={clanName} item xs={1}>
                     <CardMedia
-                        image={`/i/clans/${name.toLowerCase()}.png`}
+                        image={`/i/clans/${clanName.toLowerCase()}.png`}
                         sx={{
                             boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
                             borderRadius: '0.375rem',
@@ -37,35 +37,35 @@ export const ClanCardList = () => {
                                 Clan:
                             </Grid>
                             <Grid item xs={1}>
-                                {name}
+                                {clanName}
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
                                 Multiplier:
                             </Grid>
                             <Grid item xs={1}>
-                                {multiplier * 100}%
+                                {clanMultiplier * 100}%
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
                                 Total:
                             </Grid>
                             <Grid item xs={1}>
-                                {nftCount}
+                                {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(total)}
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
                                 Questing:
                             </Grid>
                             <Grid item xs={1}>
-                                {currentGame.questCounts[name.toLowerCase()]}
+                                {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(played)}
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
                                 Points:
                             </Grid>
                             <Grid item xs={1}>
-                                {currentGame.scores[name.toLowerCase()]}
+                                {points}
                             </Grid>
                         </Grid>
                     </CardMedia>

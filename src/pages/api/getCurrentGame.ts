@@ -1,31 +1,11 @@
 import { Nft, Prisma, PrismaClient, Quest } from '@prisma/client';
 import { Connection, PublicKey } from '@solana/web3.js';
 import handleJsonResponse, { HandlerArgs, HandlerResult } from '../../lib/handleJsonResponse';
+import { GetCurrentGameResult, Stats } from '../../lib/types';
 import { getOwnedTokenMints } from '../../lib/utils';
 
-export interface GetCurrentGameParams {
-    player?: string;
-}
-
-type Stats = {
-    clanName: string;
-    clanMultipler: number;
-    total: number;
-    played: number;
-    points: number;
-};
-
-export interface GetCurrentGameResult {
-    clanStats: Stats[];
-    playerStats: Stats[] | null;
-    endsAt: Date;
-    nfts: (Nft & { quests: Quest[] })[] | null;
-    opensAt: Date;
-    startsAt: Date;
-}
-
 const handler = async ({ req }: HandlerArgs): HandlerResult => {
-    const { player }: GetCurrentGameParams = req.body;
+    const { player }: { player: string } = req.body;
 
     const prisma = new PrismaClient();
 
@@ -70,7 +50,7 @@ const handler = async ({ req }: HandlerArgs): HandlerResult => {
     const { nfts, playerStats }: { nfts?: (Nft & { quests: Quest[] })[]; playerStats?: Stats[] } = !player
         ? {}
         : await (async () => {
-              const connection = new Connection(process.env.CLUSTER_API_URL!);
+              const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);
               const mints = await getOwnedTokenMints({ connection, owner: new PublicKey(player) });
 
               const nfts = await prisma.nft.findMany({
@@ -83,17 +63,13 @@ const handler = async ({ req }: HandlerArgs): HandlerResult => {
               return { nfts, playerStats };
           })();
 
-    const { endsAt, opensAt, startsAt } = currentGame;
-
     return [
         200,
         {
+            currentGame,
             clanStats,
             playerStats,
-            endsAt,
             nfts,
-            opensAt,
-            startsAt,
         } as GetCurrentGameResult,
     ];
 };

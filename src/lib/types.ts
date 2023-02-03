@@ -1,35 +1,16 @@
-import { Clan } from '@prisma/client';
-import { Timestamp } from 'firebase-admin/firestore';
+import { Game, Nft, Quest } from "@prisma/client";
 
-export type Trait = {
-    trait_name: string;
-    value: string;
-};
-
-export type Nft = {
-    mint: string;
-    name: string;
-    image_url: string;
-    attributes?: Trait[];
-    clan: string;
-    rank?: number;
-};
-
-export type Game = {
-    opensAt: Timestamp;
-    startsAt: Timestamp;
-    endsAt: Timestamp;
-    scores: Record<string, number>;
-    questCounts: Record<string, number>;
-};
-
-export type Quest = {
-    isRewardClaimed?: boolean;
-    mint: string;
+export type Stats = {
+    clanName: string;
+    clanMultiplier: number;
+    total: number;
+    played: number;
     points: number;
-    startedAt?: Date;
 };
 
-export type Error = {
-    message: string;
-};
+export interface GetCurrentGameResult {
+    currentGame?: Game,
+    clanStats?: Stats[];
+    nfts?: (Nft & { quests: Quest[] })[];
+    playerStats?: Stats[];
+}
