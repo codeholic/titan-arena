@@ -1,9 +1,29 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from "@prisma/client";
+import handleJsonResponse, { HandlerArgs, HandlerResult } from "../../lib/handleJsonResponse";
 
-import { getNfts } from '../../lib/queries';
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const nfts = await getNfts();
-
-    res.status(200).json(nfts.map(({ mint, image_url, race }: any) => ({ mint, image_url, race })));
+export interface GetNftsParams {
+    mints: string[];
 }
+
+const handler = async ({ req }: HandlerArgs): HandlerResult => {
+    const { mints }: GetNftsParams = req.body;
+
+    if (!mints) {
+        return [400, { message: 'No mints.' }];
+    }
+
+    const prisma = new PrismaClient();
+
+    const now = new Date();
+
+    const currentGame = await prisma.game.findFirst({ where: { opensAt: { lte: now }, endsAt: { gt: now } } });
+    if (!currentGame) {
+        return [404, { message: 'No current game.' }];
+    }
+
+    const nfts = await prisma.nft.findMany({ where: { mint: { in: mints } }, include: { quests: { where: { gameId: currentGame.id } } } });
+
+    return [200, nfts];
+};
+
+export default handleJsonResponse(handler);
