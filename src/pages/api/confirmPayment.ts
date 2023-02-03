@@ -72,7 +72,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
                                     )
                             );
                     })
-                    .then(async () => {
+                    .then(async ({ value: { err } }) => {
+                        if (err) {
+                            return Promise.reject({ message: 'Transaction error.' });
+                        }
+
                         const clanMap = (await getClans(transaction)).reduce(
                             (result: Record<string, Clan>, clan) => ({ [clan.name]: clan, ...result }),
                             {}
