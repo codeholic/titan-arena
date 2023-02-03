@@ -11,28 +11,40 @@ datasource db {
 }
 
 model Clan {
-  id          Int     @id @default(autoincrement())
-  multiplier  Float   @default(1.0)
-  name        String  @unique
-  nfts        Nft[]
-  position    Int     @unique
+  id              Int               @id @default(autoincrement())
+  clanMultipliers ClanMultiplier[]
+  name            String            @unique
+  nfts            Nft[]
+  position        Int               @unique
+}
+
+model ClanMultiplier {
+  id      Int     @id @default(autoincrement())
+  clan    Clan    @relation(fields: [clanId], references: [id])
+  clanId  Int
+  game    Game    @relation(fields: [gameId], references: [id])
+  gameId  Int
+  value   Float   @default(1.0)
+
+  @@unique([clanId, gameId])
 }
 
 model Game {
-  id        Int       @id @default(autoincrement())
-  endsAt    DateTime
-  opensAt   DateTime
-  startsAt  DateTime
-  quests    Quest[]
+  id              Int               @id @default(autoincrement())
+  clanMultipliers ClanMultiplier[]
+  endsAt          DateTime
+  opensAt         DateTime
+  startsAt        DateTime
+  quests          Quest[]
 }
 
 model Nft {
-  id        Int @id @default(autoincrement())
-  clan      Clan @relation(fields: [clanId], references: [id])
+  id        Int     @id @default(autoincrement())
+  clan      Clan    @relation(fields: [clanId], references: [id])
   clanId    Int
   imageUrl  String
-  mint      String @unique
-  name      String @unique
+  mint      String  @unique
+  name      String  @unique
   traits    Trait[]
   quests    Quest[]
 }
@@ -43,15 +55,18 @@ model Trait {
   nft   Nft     @relation(fields: [nftId], references: [id])
   nftId Int
   value String
+
+  @@unique([name, nftId])
 }
 
 model Quest {
-  id              Int @id @default(autoincrement())
-  game            Game @relation(fields: [gameId], references: [id])
+  id              Int     @id @default(autoincrement())
+  game            Game    @relation(fields: [gameId], references: [id])
   gameId          Int
   isRewardClaimed Boolean @default(false)
-  nft             Nft @relation(fields: [nftId], references: [id])
+  nft             Nft     @relation(fields: [nftId], references: [id])
   nftId           Int
-  points          Int
   startedAt       DateTime
+
+  @@unique([gameId, nftId])
 }
