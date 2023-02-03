@@ -44,8 +44,8 @@ const env = require('@next/env');
             return prisma.game.create({
                 data: {
                     opensAt: opensAt.toDate(),
-                    startsAt: opensAt.toDate(),
-                    endsAt: opensAt.toDate(),
+                    startsAt: startsAt.toDate(),
+                    endsAt: endsAt.toDate(),
                     quests: { create: await Promise.all((quests as QuestData[]).map(async ({ isRewardClaimed, mint, startedAt }: QuestData) => {
                         const nft = await prisma.nft.findUnique({ where: { mint } }) as Nft;
 
