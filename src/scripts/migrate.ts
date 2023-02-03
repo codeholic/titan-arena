@@ -35,6 +35,8 @@ const env = require('@next/env');
 
     const prisma = new PrismaClient();
 
+    const clans = await prisma.clan.findMany();
+
     await Promise.all(
         Object.entries(questData).map(async ([gamePath, quests]) => {
             const { opensAt, startsAt, endsAt } = (await db.doc(gamePath).get()).data() || {};
@@ -44,11 +46,12 @@ const env = require('@next/env');
                     opensAt: opensAt.toDate(),
                     startsAt: opensAt.toDate(),
                     endsAt: opensAt.toDate(),
-                    quests: { create: await Promise.all((quests as QuestData[]).map(async ({ isRewardClaimed, mint, points, startedAt }: QuestData) => {
+                    quests: { create: await Promise.all((quests as QuestData[]).map(async ({ isRewardClaimed, mint, startedAt }: QuestData) => {
                         const nft = await prisma.nft.findUnique({ where: { mint } }) as Nft;
 
-                        return { isRewardClaimed, nftId: nft.id, points, startedAt: startedAt.toDate() };
+                        return { isRewardClaimed, nftId: nft.id, startedAt: startedAt.toDate() };
                     })) },
+                    clanMultipliers: { create: clans.map(({ id: clanId }) => ({ clanId })) },
                 },
             });
         })
