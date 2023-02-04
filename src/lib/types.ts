@@ -1,4 +1,4 @@
-import { Game, Nft, Quest } from "@prisma/client";
+import { Game, Nft, Quest } from '@prisma/client';
 
 export type Stats = {
     clanName: string;
@@ -9,7 +9,7 @@ export type Stats = {
 };
 
 export interface GetCurrentGameResult {
-    currentGame?: Game,
+    currentGame?: Game;
     clanStats?: Stats[];
     nfts?: (Nft & { quests: Quest[] })[];
     playerStats?: Stats[];

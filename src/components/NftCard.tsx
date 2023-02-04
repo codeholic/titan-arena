@@ -61,8 +61,7 @@ const NftCardContent = ({ quest }: NftCardContentProps) => (
             </Box>
         )}
 
-        {
-        /*quest?.points && (
+        {/*quest?.points && (
             <Box
                 sx={{
                     position: 'absolute',
@@ -77,8 +76,7 @@ const NftCardContent = ({ quest }: NftCardContentProps) => (
                 {!quest?.startedAt && '+'}
                 {quest.points}
             </Box>
-            )*/
-        }
+            )*/}
     </>
 );
 

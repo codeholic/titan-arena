@@ -37,9 +37,8 @@ const handler = async ({ req }: HandlerArgs): HandlerResult => {
             INNER JOIN Nft ON Nft.clanId = Clan.id
             LEFT JOIN Quest ON Quest.gameId = Game.id AND Quest.nftId = Nft.id
         WHERE
-            Game.id = ${currentGame.id} AND (Nft.mint IN (${Prisma.join(!mints ? [null] : mints)}) OR ${
-        !mints ? 0 : 1
-    } = 0)
+            Game.id = ${currentGame.id}
+            AND (Nft.mint IN (${Prisma.join(!mints ? [null] : mints)}) OR ${!mints ? 0 : 1} = 0)
         GROUP BY
             Clan.name
         ORDER BY
