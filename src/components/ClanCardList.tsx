@@ -65,7 +65,7 @@ export const ClanCardList = () => {
                                 Points:
                             </Grid>
                             <Grid item xs={1}>
-                                {points}
+                                {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(points)}
                             </Grid>
                         </Grid>
                     </CardMedia>

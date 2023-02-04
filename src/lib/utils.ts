@@ -1,9 +1,11 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { Clan, Game } from '@prisma/client';
+import { Clan, Game, Prisma, PrismaClient } from '@prisma/client';
+import { Stats } from './types';
 
 export const BASE_POINTS = 100;
 
+/*
 export const calculateReward = (game: Game, clan: Clan) => {
     const now = Date.now();
     const durationMultiplier =
@@ -13,6 +15,7 @@ export const calculateReward = (game: Game, clan: Clan) => {
 
     return Math.ceil(BASE_POINTS * clan.multiplier * durationMultiplier);
 };
+*/
 
 export const findAssociatedAddress = ({ mint, owner }: { mint: PublicKey; owner: PublicKey }): PublicKey => {
     const [address] = PublicKey.findProgramAddressSync(
@@ -39,3 +42,37 @@ export const getOwnedTokenMints = ({ connection, owner }: GetOwnedTokenMintsProp
             return amount === '0' ? result : [mint, ...result];
         }, [])
     );
+
+export const getStats = (prisma: PrismaClient, id: number, mints?: string[]): Promise<Stats[]> =>
+    prisma.$queryRaw`
+        SELECT
+            Clan.id AS clanId,
+            Clan.name AS clanName,
+            ClanMultiplier.value AS clanMultiplier,
+            COUNT(Nft.id) AS total,
+            COUNT(Quest.id) AS played,
+            IFNULL(
+                SUM(
+                    ROUND(
+                        MIN(
+                            (CAST(Game.endsAt AS FLOAT) - Quest.startedAt) / (CAST(Game.endsAt AS FLOAT) - Game.startsAt),
+                            1.0
+                        ) * ClanMultiplier.value * 100 + 0.5 - 1E-10
+                    )
+                ),
+                0
+            ) AS points
+        FROM
+            Game
+            INNER JOIN ClanMultiplier ON ClanMultiplier.gameId = Game.id
+            INNER JOIN Clan ON Clan.id = ClanMultiplier.clanId
+            INNER JOIN Nft ON Nft.clanId = Clan.id
+            LEFT JOIN Quest ON Quest.gameId = Game.id AND Quest.nftId = Nft.id
+        WHERE
+            Game.id = ${id}
+            AND (Nft.mint IN (${Prisma.join(!mints ? [null] : mints)}) OR ${!mints ? 0 : 1} = 0)
+        GROUP BY
+            Clan.id
+        ORDER BY
+            Clan.position
+        `;
