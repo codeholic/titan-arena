@@ -1,21 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { Clan, Game, Prisma, PrismaClient } from '@prisma/client';
+import { Game, Nft, Prisma, PrismaClient, Quest } from '@prisma/client';
 import { Stats } from './types';
-
-export const BASE_POINTS = 100;
-
-/*
-export const calculateReward = (game: Game, clan: Clan) => {
-    const now = Date.now();
-    const durationMultiplier =
-        game.startsAt.valueOf() > now
-            ? 1
-            : (game.endsAt.valueOf() - now) / (game.endsAt.valueOf() - game.startsAt.valueOf());
-
-    return Math.ceil(BASE_POINTS * clan.multiplier * durationMultiplier);
-};
-*/
 
 export const findAssociatedAddress = ({ mint, owner }: { mint: PublicKey; owner: PublicKey }): PublicKey => {
     const [address] = PublicKey.findProgramAddressSync(
@@ -76,3 +62,18 @@ export const getStats = (prisma: PrismaClient, id: number, mints?: string[]): Pr
         ORDER BY
             Clan.position
         `;
+
+export const BASE_POINTS = 100;
+
+export const calculateQuestPoints = (game: Game, stats: Stats[], nft: Nft & { quests: Quest[] }): number => {
+    const startedAt = nft.quests[0]?.startedAt || new Date();
+
+    const durationMultiplier =
+        game.startsAt.valueOf() > startedAt.valueOf()
+            ? 1
+            : (game.endsAt.valueOf() - startedAt.valueOf()) / (game.endsAt.valueOf() - game.startsAt.valueOf());
+
+    const { clanMultiplier } = stats.find(({ clanId }) => clanId === nft.clanId)!;
+
+    return Math.ceil(BASE_POINTS * durationMultiplier * clanMultiplier);
+};

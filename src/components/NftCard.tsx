@@ -1,6 +1,8 @@
 import { Box, CardMedia, CardMediaProps, Skeleton, styled, useTheme } from '@mui/material';
 import { Nft, Quest } from '@prisma/client';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { forwardRef, useContext, useEffect, useMemo, useState } from 'react';
+import { calculateQuestPoints } from '../lib/utils';
+import { DataContext } from '../pages';
 
 export type NftCardProps = {
     name: string;
@@ -42,43 +44,54 @@ const NftCardMedia = styled(CardMedia, {
 }));
 
 interface NftCardContentProps {
-    quest?: Quest;
+    nft: Nft & { quests: Quest[] };
 }
 
-const NftCardContent = ({ quest }: NftCardContentProps) => (
-    <>
-        {quest?.startedAt && (
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    fontSize: '20px',
-                }}
-            >
-                Questing
-            </Box>
-        )}
+const NftCardContent = ({ nft }: NftCardContentProps) => {
+    const { currentGame, clanStats } = useContext(DataContext);
 
-        {/*quest?.points && (
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    margin: 1,
-                    px: 1,
-                    borderRadius: 1,
-                    backgroundColor: quest?.startedAt ? 'rgba(56, 161, 105, 0.7)' : 'rgba(49, 130, 206, 0.7)',
-                }}
-            >
-                {!quest?.startedAt && '+'}
-                {quest.points}
-            </Box>
-            )*/}
-    </>
-);
+    if (!currentGame || !clanStats) {
+        return null;
+    }
+
+    const points: number | undefined = currentGame && calculateQuestPoints(currentGame, clanStats, nft);
+    const quest = nft.quests[0];
+
+    return (
+        <>
+            {quest?.startedAt && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        fontSize: '20px',
+                    }}
+                >
+                    Questing
+                </Box>
+            )}
+
+            {!!points && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        margin: 1,
+                        px: 1,
+                        borderRadius: 1,
+                        backgroundColor: quest?.startedAt ? 'rgba(56, 161, 105, 0.7)' : 'rgba(49, 130, 206, 0.7)',
+                    }}
+                >
+                    {!quest?.startedAt && '+'}
+                    {points}
+                </Box>
+            )}
+        </>
+    );
+};
 
 const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
     ({ name, setValue, nft, defaultChecked, isSubmitting }, ref) => {
@@ -93,7 +106,7 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
             image.onload = () => setIsLoading(false);
         });
 
-        const isQuesting = useMemo(() => !!nft.quests[0].startedAt, [nft]);
+        const isQuesting = useMemo(() => !!nft.quests?.[0]?.startedAt, [nft]);
 
         useEffect(() => setValue(name, checked && !isQuesting), [name, checked, setValue, isQuesting]);
 
@@ -122,12 +135,12 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                         }
                     }}
                 >
-                    <NftCardContent quest={nft.quests[0]} />
+                    <NftCardContent nft={nft} />
                 </NftCardMedia>
             </>
         ) : (
             <Box position="relative" sx={{ fontFamily: theme.typography.button.fontFamily }}>
-                <NftCardContent quest={nft.quests[0]} />
+                <NftCardContent nft={nft} />
 
                 <Skeleton
                     variant="rounded"
