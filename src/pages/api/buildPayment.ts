@@ -1,9 +1,9 @@
 import { sha512 } from '@noble/hashes/sha512';
 import { createTransferCheckedInstruction } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, /* SystemProgram, */ Transaction } from '@solana/web3.js';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { Error } from '../../lib/types';
+import type { NextApiRequest } from 'next';
 import { findAssociatedAddress } from '../../lib/utils';
+import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 
 type BuildPaymentParams = {
     payer: string;
@@ -17,7 +17,7 @@ export type BuildPaymentResult = {
 
 const LAMPORTS_PER_NFT = BigInt('10000000');
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<BuildPaymentResult | Error>) {
+const handler = async (req: NextApiRequest): HandlerResult => {
     const params: BuildPaymentParams = req.body;
 
     const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);
@@ -50,12 +50,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     transaction.feePayer = payer;
 
-    await connection.getLatestBlockhash('finalized').then(({ blockhash }) => {
-        transaction.recentBlockhash = blockhash;
+    const { blockhash } = await connection.getLatestBlockhash('finalized');
 
-        const transactionMessage = transaction.serializeMessage().toString('base64');
-        const checksum = Buffer.from(sha512(transactionMessage + params.nftCount + salt)).toString('base64');
+    transaction.recentBlockhash = blockhash;
 
-        res.status(200).json({ transactionMessage, checksum });
-    });
-}
+    const transactionMessage = transaction.serializeMessage().toString('base64');
+    const checksum = Buffer.from(sha512(transactionMessage + params.nftCount + salt)).toString('base64');
+
+    return [200, { transactionMessage, checksum }];
+};
+
+export default handleJsonResponse(handler);

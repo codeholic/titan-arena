@@ -21,6 +21,7 @@ import NftCard from './NftCard';
 import { Message, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
 import { BuildPaymentResult } from '../pages/api/buildPayment';
+import superjson from 'superjson';
 
 export const NftCardList = () => {
     const wallet = useWallet();
@@ -89,7 +90,8 @@ export const NftCardList = () => {
         })
             .then((data) =>
                 data
-                    .json()
+                    .text()
+                    .then(superjson.parse)
                     .catch(() => Promise.reject({ message: 'Internal server error.' }))
                     .then((result) => {
                         if (!data.ok) {
@@ -117,7 +119,8 @@ export const NftCardList = () => {
                                       headers: { 'Content-Type': 'application/json' },
                                   }).then((data) =>
                                       data
-                                          .json()
+                                          .text()
+                                          .then(superjson.parse)
                                           .catch(() => Promise.reject({ message: 'Internal server error.' }))
                                           .then((result) => {
                                               if (!data.ok) {

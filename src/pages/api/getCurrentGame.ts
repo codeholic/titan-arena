@@ -1,10 +1,11 @@
 import { Nft, PrismaClient, Quest } from '@prisma/client';
 import { Connection, PublicKey } from '@solana/web3.js';
-import handleJsonResponse, { HandlerArgs, HandlerResult } from '../../lib/handleJsonResponse';
+import { NextApiRequest } from 'next';
+import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 import { GetCurrentGameResult, Stats } from '../../lib/types';
 import { getStats, getOwnedTokenMints } from '../../lib/utils';
 
-const handler = async ({ req }: HandlerArgs): HandlerResult => {
+const handler = async (req: NextApiRequest): HandlerResult => {
     const { player }: { player: string } = req.body;
 
     const prisma = new PrismaClient();
@@ -27,7 +28,7 @@ const handler = async ({ req }: HandlerArgs): HandlerResult => {
                   where: { mint: { in: mints } },
                   include: { quests: { where: { gameId: currentGame.id } } },
               });
-              console.log(nfts);
+
               const playerStats = await getStats(prisma, currentGame.id, mints);
 
               return { nfts, playerStats };
