@@ -139,15 +139,20 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
                 </NftCardMedia>
             </>
         ) : (
-            <Box position="relative" sx={{ fontFamily: theme.typography.button.fontFamily }}>
+            <Box
+                position="relative"
+                sx={{
+                    fontFamily: theme.typography.button.fontFamily,
+                    ...(checked ? { border: '5px solid #F7FAFC', borderRadius: '5px', margin: '-5px' } : {}),
+                }}
+            >
                 <NftCardContent nft={nft} />
 
                 <Skeleton
                     variant="rounded"
                     sx={{
                         paddingTop: '100%',
-                        ...(checked ? { border: '5px solid #F7FAFC', margin: '-5px' } : {}),
-                        ...(!!nft.quests[0] && !isQuesting ? { cursor: 'pointer' } : { cursor: 'not-allowed' }),
+                        ...(isDisabled ? { cursor: 'not-allowed' } : { cursor: 'pointer' }),
                     }}
                     onClick={() => {
                         if (!isDisabled) {
