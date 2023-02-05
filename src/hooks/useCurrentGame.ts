@@ -3,10 +3,15 @@ import useSWR from 'swr';
 import { PublicKey } from '@solana/web3.js';
 import superjson from 'superjson';
 
-import { GetCurrentGameResult } from '../lib/types';
+import { GetCurrentGameResult, Stats } from '../lib/types';
+import { Game, Nft, Quest } from '@prisma/client';
 
 export type UseCurrentGameResult = GetCurrentGameResult & {
+    currentGame?: Game;
+    clanStats?: Stats[];
     isLoading: boolean;
+    nfts?: Nft & { quests: Quest[] };
+    playerStats?: Stats[];
     reload: Function;
 };
 
@@ -24,5 +29,5 @@ export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult =
         mutate: reload,
     } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args));
 
-    return { ...(data || {}), isLoading, reload };
+    return { ...((data as Object) || {}), isLoading, reload };
 };

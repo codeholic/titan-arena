@@ -39,12 +39,13 @@ model Game {
 }
 
 model Nft {
-  id        Int     @id @default(autoincrement())
-  clan      Clan    @relation(fields: [clanId], references: [id])
+  id        Int       @id @default(autoincrement())
+  clan      Clan      @relation(fields: [clanId], references: [id])
   clanId    Int
   imageUrl  String
-  mint      String  @unique
-  name      String  @unique
+  lockedAt  DateTime?
+  mint      String    @unique
+  name      String    @unique
   traits    Trait[]
   quests    Quest[]
 }
