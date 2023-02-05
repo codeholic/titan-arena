@@ -15,7 +15,7 @@ type ConfirmPaymentParams = {
 
 export type ConfirmPaymentResult = {};
 
-const handler = async (req: NextApiRequest): HandlerResult => {
+const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
     const params: ConfirmPaymentParams = req.body;
 
     const salt = process.env.TRANSACTION_MESSAGE_CHECKSUM_SALT!;
@@ -24,8 +24,6 @@ const handler = async (req: NextApiRequest): HandlerResult => {
     if (checksum !== params.checksum) {
         return [400, { message: 'Wrong checksum.' }];
     }
-
-    const prisma = new PrismaClient();
 
     const solanaTx = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
     if (!solanaTx.feePayer) {
@@ -68,8 +66,6 @@ const handler = async (req: NextApiRequest): HandlerResult => {
         return [200, {}];
     });
 
-    await prisma.$disconnect();
-
     solanaTx.addSignature(solanaTx.feePayer!, Buffer.from(params.signature, 'base64'));
 
     return (
@@ -100,7 +96,11 @@ const handler = async (req: NextApiRequest): HandlerResult => {
                 )
                 .then(() => [200, {}]);
         }) as HandlerResult
-    ).finally(() => prisma.nft.updateMany({ where: { mint: { in: params.mints } }, data: { lockedAt: null } }));
+    ).finally(async () => {
+        await prisma.$connect();
+
+        await prisma.nft.updateMany({ where: { mint: { in: params.mints } }, data: { lockedAt: null } });
+    });
 };
 
 export default handleJsonResponse(handler);

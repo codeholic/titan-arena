@@ -5,10 +5,8 @@ import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse'
 import { GetCurrentGameResult, Stats } from '../../lib/types';
 import { getStats, getOwnedTokenMints } from '../../lib/utils';
 
-const handler = async (req: NextApiRequest): HandlerResult => {
+const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
     const { player }: { player: string } = req.body;
-
-    const prisma = new PrismaClient();
 
     const now = new Date();
 
