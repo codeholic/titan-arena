@@ -5,7 +5,8 @@ import superjson from 'superjson';
 export type HandlerResult = Promise<[status: number, body: any]>;
 
 const handleJsonResponse =
-    (handler: (req: NextApiRequest, prisma: PrismaClient) => HandlerResult) => async (req: NextApiRequest, res: NextApiResponse) => {
+    (handler: (req: NextApiRequest, prisma: PrismaClient) => HandlerResult) =>
+    async (req: NextApiRequest, res: NextApiResponse) => {
         res.setHeader('Content-Type', 'application/json');
 
         const prisma = new PrismaClient();
