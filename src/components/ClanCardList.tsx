@@ -184,7 +184,7 @@ export const ClanCardList = () => {
                                 Reward:
                             </Grid>
                             <Grid item xs={1}>
-                                {clanEarnings[index]} MYTHIC
+                                {Math.round(clanEarnings[index])} MYTHIC
                             </Grid>
                         </Grid>
                     </CardMedia>
