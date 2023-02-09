@@ -37,17 +37,7 @@ export const getStats = (prisma: PrismaClient, id: number, mints?: string[]): Pr
             ClanMultiplier.value AS clanMultiplier,
             COUNT(Nft.id) AS total,
             COUNT(Quest.id) AS played,
-            IFNULL(
-                SUM(
-                    ROUND(
-                        MIN(
-                            (CAST(Game.endsAt AS FLOAT) - Quest.startedAt) / (CAST(Game.endsAt AS FLOAT) - Game.startsAt),
-                            1.0
-                        ) * ClanMultiplier.value * 100 + 0.5 - 1E-10
-                    )
-                ),
-                0
-            ) AS points
+            SUM(Quest.points) AS points
         FROM
             Game
             INNER JOIN ClanMultiplier ON ClanMultiplier.gameId = Game.id
