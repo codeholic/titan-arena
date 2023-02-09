@@ -13,7 +13,7 @@ export const ClanCardList = () => {
     }
 
     const sortedClanStats = [...clanStats];
-    sortedClanStats.sort((a, b) => b.points - a.points);
+    sortedClanStats.sort((a, b) => Number(b.points - a.points));
 
     const firstPlace: Record<number, boolean> = {},
         lastPlace: Record<number, boolean> = {};
