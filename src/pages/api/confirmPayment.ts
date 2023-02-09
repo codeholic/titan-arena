@@ -4,7 +4,7 @@ import { Connection, Message, Transaction } from '@solana/web3.js';
 import type { NextApiRequest } from 'next';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 
-import { getOwnedTokenMints } from '../../lib/utils';
+import { calculateQuestPoints, getOwnedTokenMints } from '../../lib/utils';
 
 type ConfirmPaymentParams = {
     mints: string[];
@@ -83,15 +83,25 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
             await prisma.$connect();
 
             return prisma
-                .$transaction(
-                    params.mints.map((mint) =>
-                        prisma.quest.create({
-                            data: {
-                                nft: { connect: { mint } },
-                                game: { connect: { id: currentGame!.id } },
-                                startedAt: now,
-                            },
-                        })
+                .$transaction((tx) =>
+                    Promise.all(
+                        params.mints.map((mint) =>
+                            tx.clanMultiplier
+                                .findFirst({
+                                    include: { clan: { include: { nfts: { where: { mint } } } } },
+                                    where: { gameId: currentGame!.id },
+                                })
+                                .then((clanMultiplier) =>
+                                    tx.quest.create({
+                                        data: {
+                                            nft: { connect: { mint } },
+                                            game: { connect: { id: currentGame!.id } },
+                                            points: calculateQuestPoints(currentGame!, clanMultiplier!.value),
+                                            startedAt: now,
+                                        },
+                                    })
+                                )
+                        )
                     )
                 )
                 .then(() => [200, {}]);

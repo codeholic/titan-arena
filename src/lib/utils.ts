@@ -65,15 +65,13 @@ export const getStats = (prisma: PrismaClient, id: number, mints?: string[]): Pr
 
 export const BASE_POINTS = 100;
 
-export const calculateQuestPoints = (game: Game, stats: Stats[], nft: Nft & { quests: Quest[] }): number => {
-    const startedAt = nft.quests[0]?.startedAt || new Date();
+export const calculateQuestPoints = (game: Game, clanMultiplier: number, startedAt?: Date): number => {
+    startedAt ||= new Date();
 
     const durationMultiplier =
-        game.startsAt.valueOf() > startedAt.valueOf()
+        game!.startsAt.valueOf() > startedAt.valueOf()
             ? 1
             : (game.endsAt.valueOf() - startedAt.valueOf()) / (game.endsAt.valueOf() - game.startsAt.valueOf());
-
-    const { clanMultiplier } = stats.find(({ clanId }) => clanId === nft.clanId)!;
 
     return Math.ceil(BASE_POINTS * durationMultiplier * clanMultiplier);
 };

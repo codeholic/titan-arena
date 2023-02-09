@@ -54,8 +54,9 @@ const NftCardContent = ({ nft }: NftCardContentProps) => {
         return null;
     }
 
-    const points: number | undefined = currentGame && calculateQuestPoints(currentGame, clanStats, nft);
     const quest = nft.quests[0];
+    const { clanMultiplier } = clanStats.find(({ clanId }) => clanId === nft.clanId)!;
+    const points = currentGame && calculateQuestPoints(currentGame, clanMultiplier, quest?.startedAt);
 
     return (
         <>
