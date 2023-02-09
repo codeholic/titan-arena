@@ -35,15 +35,13 @@ export const ClanCardList = () => {
     const totalPlayed = clanStats.reduce((result, stats) => result + Number(stats.played), 0);
     const totalEarned = totalPlayed * 10;
 
-    const clanEarnings = clanStats.map(({ clanId, points }) =>
+    const clanEarnings = clanStats.map(({ clanId }) =>
         firstPlace[clanId]
             ? (totalEarned * 0.7) / Object.keys(firstPlace).length
             : lastPlace[clanId]
             ? 0
             : (totalEarned * 0.2) / (clanStats.length - Object.keys(firstPlace).length - Object.keys(lastPlace).length)
     );
-
-    console.log(clanEarnings);
 
     return (
         <Grid container columns={{ xs: 2, md: 4 }} my={1} spacing={2}>
