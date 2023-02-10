@@ -2,7 +2,7 @@ import { sha512 } from '@noble/hashes/sha512';
 import { createTransferCheckedInstruction } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, /* SystemProgram, */ Transaction } from '@solana/web3.js';
 import type { NextApiRequest } from 'next';
-import { findAssociatedAddress } from '../../lib/utils';
+import { findAssociatedAddress, LAMPORTS_PER_NFT } from '../../lib/utils';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 
 type BuildPaymentParams = {
@@ -14,8 +14,6 @@ export type BuildPaymentResult = {
     transactionMessage: string;
     checksum: string;
 };
-
-const LAMPORTS_PER_NFT = BigInt('10000000');
 
 const handler = async (req: NextApiRequest): HandlerResult => {
     const params: BuildPaymentParams = req.body;

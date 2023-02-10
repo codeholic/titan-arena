@@ -4,9 +4,9 @@ export type Stats = {
     clanId: number;
     clanName: string;
     clanMultiplier: number;
-    total: number;
-    played: number;
-    points: number;
+    total: bigint;
+    played: bigint;
+    points: bigint;
 };
 
 export interface GetCurrentGameResult {

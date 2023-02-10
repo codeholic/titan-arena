@@ -11,6 +11,7 @@ export type UseCurrentGameResult = GetCurrentGameResult & {
     clanStats?: Stats[];
     isLoading: boolean;
     nfts?: Nft & { quests: Quest[] };
+    pendingReward?: bigint;
     playerStats?: Stats[];
     reload: Function;
 };

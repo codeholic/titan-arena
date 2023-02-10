@@ -24,7 +24,7 @@ const env = require('@next/env');
 
     const clanStats = await getStats(prisma, lastGame.id);
 
-    const sortedClanStats = clanStats.sort((a, b) => b.points - a.points);
+    const sortedClanStats = clanStats.sort((a, b) => Number(b.points - a.points));
 
     const opensAt = lastGame.endsAt;
     const startsAt = new Date(new Date().setDate(opensAt.getDate() + 2));

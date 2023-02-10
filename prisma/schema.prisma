@@ -62,12 +62,13 @@ model Trait {
 
 model Quest {
   id              Int     @id @default(autoincrement())
+  clamedAt  DateTime?
   game            Game    @relation(fields: [gameId], references: [id])
   gameId          Int
-  isRewardClaimed Boolean @default(false)
   nft             Nft     @relation(fields: [nftId], references: [id])
   nftId           Int
   points          Int?
+  rewardClaimedAt DateTime?
   startedAt       DateTime
 
   @@unique([gameId, nftId])

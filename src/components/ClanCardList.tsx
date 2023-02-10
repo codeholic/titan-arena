@@ -1,7 +1,10 @@
-import { CardMedia, Fade, Grid, useTheme } from '@mui/material';
+import { CardMedia, Grid, useTheme } from '@mui/material';
 import { Box } from '@mui/system';
 import { useContext } from 'react';
+import { formatAmount, getEarnings } from '../lib/utils';
 import { DataContext } from '../pages';
+import { WithdrawWidget } from './WithdrawWidget';
+import { MYTHIC_DECIMALS, SOL_DECIMALS } from '../lib/constants';
 
 export const ClanCardList = () => {
     const theme = useTheme();
@@ -12,45 +15,8 @@ export const ClanCardList = () => {
         return null;
     }
 
-    const sortedClanStats = [...clanStats];
-    sortedClanStats.sort((a, b) => Number(b.points - a.points));
-
-    const firstPlace: Record<number, boolean> = {},
-        lastPlace: Record<number, boolean> = {};
-
-    if (sortedClanStats[0].points > sortedClanStats[1].points) {
-        firstPlace[sortedClanStats[0].clanId] = true;
-    } else if (sortedClanStats[1].points > sortedClanStats[2].points) {
-        firstPlace[sortedClanStats[0].clanId] = firstPlace[sortedClanStats[1].clanId] = true;
-    }
-
-    const lastIndex = sortedClanStats.length - 1;
-
-    if (sortedClanStats[lastIndex].points < sortedClanStats[lastIndex - 1].points) {
-        lastPlace[sortedClanStats[lastIndex].clanId] = true;
-    } else if (sortedClanStats[lastIndex - 1].points < sortedClanStats[lastIndex - 2].points) {
-        lastPlace[sortedClanStats[lastIndex].clanId] = lastPlace[sortedClanStats[lastIndex - 1].clanId] = true;
-    }
-
-    const totalPlayed = clanStats.reduce((result, { played }) => result + Number(played), 0);
-    const totalEarned = totalPlayed * 10;
-
-    const clanEarnings = clanStats.map(({ clanId }) =>
-        firstPlace[clanId]
-            ? (totalEarned * 0.7) / Object.keys(firstPlace).length
-            : lastPlace[clanId]
-            ? 0
-            : (totalEarned * 0.2) / (clanStats.length - Object.keys(firstPlace).length - Object.keys(lastPlace).length)
-    );
-
-    const playerPlayed = playerStats && playerStats.reduce((result, { played }) => result + Number(played), 0);
-    const playerEarnings =
-        playerStats &&
-        clanStats.map(
-            ({ points }, index) => (Number(playerStats[index].points) / Number(points)) * clanEarnings[index]
-        );
-
-    const playerEarned = playerEarnings && playerEarnings.reduce((result, share) => result + share, 0);
+    const { totalPaid, totalEarned, clanEarnings, firstPlace, lastPlace, playerPaid, playerEarnings, playerEarned } =
+        getEarnings(clanStats, playerStats);
 
     return (
         <Grid container columns={{ xs: 2, md: 4 }} my={1} spacing={2}>
@@ -87,15 +53,16 @@ export const ClanCardList = () => {
                             SOL Collected:
                         </Grid>
                         <Grid item xs={1}>
-                            {playerPlayed !== undefined ? playerPlayed * 0.01 : '?'}/{totalPlayed * 0.01}
+                            {playerPaid !== undefined ? formatAmount(playerPaid, SOL_DECIMALS) : '?'}/
+                            {formatAmount(totalPaid, SOL_DECIMALS)}
                         </Grid>
 
                         <Grid item xs={1} sx={{ pr: 1 }}>
                             MYTHIC To Be Emitted:
                         </Grid>
                         <Grid item xs={1}>
-                            {playerEarned !== undefined ? Number(playerEarned.toFixed(2)) : '?'}/
-                            {Number(totalEarned.toFixed(2))}
+                            {playerEarned !== undefined ? formatAmount(playerEarned, MYTHIC_DECIMALS) : '?'}/
+                            {formatAmount(totalEarned, MYTHIC_DECIMALS)}
                         </Grid>
                     </Grid>
                 </Box>
@@ -117,7 +84,7 @@ export const ClanCardList = () => {
                     }}
                 >
                     <Box position="absolute" sx={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-                        Reward Claim in Progress
+                        <WithdrawWidget />
                     </Box>
                 </Box>
             </Grid>
@@ -184,8 +151,8 @@ export const ClanCardList = () => {
                                 MYTHIC:
                             </Grid>
                             <Grid item xs={1} sx={{ whiteSpace: 'nowrap' }}>
-                                {playerEarnings ? Number(playerEarnings[index].toFixed(2)) : '?'}/
-                                {Number(clanEarnings[index].toFixed(2))}
+                                {playerEarnings ? formatAmount(playerEarnings[index], MYTHIC_DECIMALS) : '?'}/
+                                {formatAmount(clanEarnings[index], MYTHIC_DECIMALS)}
                             </Grid>
                         </Grid>
                     </CardMedia>

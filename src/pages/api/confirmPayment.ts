@@ -62,8 +62,6 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
         }
 
         await tx.nft.updateMany({ where: { mint: { in: params.mints } }, data: { lockedAt: new Date() } });
-
-        return [200, {}];
     });
 
     solanaTx.addSignature(solanaTx.feePayer!, Buffer.from(params.signature, 'base64'));

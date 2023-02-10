@@ -22,6 +22,7 @@ import { Message, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
 import { BuildPaymentResult } from '../pages/api/buildPayment';
 import superjson from 'superjson';
+import { Spinner } from './Spinner';
 
 export const NftCardList = () => {
     const wallet = useWallet();
@@ -187,14 +188,9 @@ export const NftCardList = () => {
                 </Box>
             )}
 
-            <Dialog open={isSubmitting}>
-                <DialogContent>
-                    <Stack direction="row" spacing={1} display="flex" alignItems="center">
-                        <CircularProgress size={20} />
-                        <Box>Sending {mints.length > 1 ? `${mints.length} titans` : 'a titan'} on a quest&hellip;</Box>
-                    </Stack>
-                </DialogContent>
-            </Dialog>
+            <Spinner open={isSubmitting}>
+                Sending {mints.length > 1 ? `${mints.length} titans` : 'a titan'} on a quest&hellip;
+            </Spinner>
         </form>
     );
 };
