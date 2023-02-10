@@ -32,7 +32,7 @@ export const ClanCardList = () => {
         lastPlace[sortedClanStats[lastIndex].clanId] = lastPlace[sortedClanStats[lastIndex - 1].clanId] = true;
     }
 
-    const totalPlayed = clanStats.reduce((result, stats) => result + Number(stats.played), 0);
+    const totalPlayed = clanStats.reduce((result, { played }) => result + Number(played), 0);
     const totalEarned = totalPlayed * 10;
 
     const clanEarnings = clanStats.map(({ clanId }) =>
@@ -42,6 +42,15 @@ export const ClanCardList = () => {
             ? 0
             : (totalEarned * 0.2) / (clanStats.length - Object.keys(firstPlace).length - Object.keys(lastPlace).length)
     );
+
+    const playerPlayed = playerStats && playerStats.reduce((result, { played }) => result + Number(played), 0);
+    const playerEarnings =
+        playerStats &&
+        clanStats.map(
+            ({ points }, index) => (Number(playerStats[index].points) / Number(points)) * clanEarnings[index]
+        );
+
+    const playerEarned = playerEarnings && playerEarnings.reduce((result, share) => result + share, 0);
 
     return (
         <Grid container columns={{ xs: 2, md: 4 }} my={1} spacing={2}>
@@ -75,29 +84,19 @@ export const ClanCardList = () => {
                         </Grid>
 
                         <Grid item xs={1} sx={{ pr: 1 }}>
-                            Collected:
+                            SOL Collected:
                         </Grid>
                         <Grid item xs={1}>
-                            {totalPlayed * 0.01} SOL
+                            {playerPlayed !== undefined ? playerPlayed * 0.01 : '?'}/{totalPlayed * 0.01}
                         </Grid>
 
                         <Grid item xs={1} sx={{ pr: 1 }}>
-                            To Be Emitted:
+                            MYTHIC To Be Emitted:
                         </Grid>
                         <Grid item xs={1}>
-                            {totalEarned} MYTHIC
+                            {playerEarned !== undefined ? Number(playerEarned.toFixed(2)) : '?'}/
+                            {Number(totalEarned.toFixed(2))}
                         </Grid>
-
-                        {/*!!playerStats && (
-                            <>
-                                <Grid item xs={1} sx={{ pr: 1 }}>
-                                    Your Share:
-                                </Grid>
-                                <Grid item xs={1}>
-                                    ...
-                                </Grid>
-                            </>
-                        )*/}
                     </Grid>
                 </Box>
             </Grid>
@@ -161,6 +160,7 @@ export const ClanCardList = () => {
                                 Total:
                             </Grid>
                             <Grid item xs={1}>
+                                {playerStats ? String(playerStats[index].total) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(total)}
                             </Grid>
 
@@ -168,6 +168,7 @@ export const ClanCardList = () => {
                                 Questing:
                             </Grid>
                             <Grid item xs={1}>
+                                {playerStats ? String(playerStats[index].played) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(played)}
                             </Grid>
 
@@ -175,14 +176,16 @@ export const ClanCardList = () => {
                                 Points:
                             </Grid>
                             <Grid item xs={1}>
+                                {playerStats ? String(playerStats[index].points) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(points)}
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
-                                Reward:
+                                MYTHIC:
                             </Grid>
-                            <Grid item xs={1}>
-                                {Math.round(clanEarnings[index])} MYTHIC
+                            <Grid item xs={1} sx={{ whiteSpace: 'nowrap' }}>
+                                {playerEarnings ? Number(playerEarnings[index].toFixed(2)) : '?'}/
+                                {Number(clanEarnings[index].toFixed(2))}
                             </Grid>
                         </Grid>
                     </CardMedia>
