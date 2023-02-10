@@ -121,7 +121,13 @@ const handler = async (req: NextApiRequest): HandlerResult => {
             );
         });
 
-    return result.finally(() => prisma.nft.updateMany({ where: { mint: { in: mints } }, data: { lockedAt: null } }));
+    return result.finally(async () => {
+        await prisma.$connect();
+
+        await prisma.nft.updateMany({ where: { mint: { in: mints } }, data: { lockedAt: null } });
+
+        await prisma.$disconnect();
+    });
 };
 
 export default handleJsonResponse(handler);

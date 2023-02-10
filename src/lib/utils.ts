@@ -50,7 +50,7 @@ export const getStats = (
             ClanMultiplier.value AS clanMultiplier,
             COUNT(Nft.id) AS total,
             COUNT(Quest.id) AS played,
-            SUM(Quest.points) AS points
+            IFNULL(SUM(Quest.points), 0) AS points
         FROM
             Game
             INNER JOIN ClanMultiplier ON ClanMultiplier.gameId = Game.id
@@ -133,7 +133,9 @@ export const getEarnings = (
     );
 
     const playerPlayed = playerStats && playerStats.reduce((result, { played }) => result + played, BigInt(0));
+
     const playerPaid = playerPlayed === undefined ? undefined : playerPlayed * LAMPORTS_PER_NFT;
+
     const playerEarnings =
         playerStats && clanStats.map(({ points }, index) => (playerStats[index].points * clanEarnings[index]) / points);
 

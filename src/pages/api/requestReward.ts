@@ -20,6 +20,8 @@ const handler = async (req: NextApiRequest): HandlerResult => {
 
     const amount = await calculatePendingReward(prisma, claimedAt, mints);
     if (amount === BigInt(0)) {
+        await prisma.$disconnect();
+
         return [422, 'No reward to claim.'];
     }
 
@@ -28,7 +30,7 @@ const handler = async (req: NextApiRequest): HandlerResult => {
     const authority = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.AUTHORITY_PRIVATE_KEY!)));
     const owner = new PublicKey(player);
 
-    const mint = new PublicKey(process.env.NEXT_PUBLIC_MYTHIC_MINT!);
+    const mint = new PublicKey(process.env.NEXT_PUBLIC_MYTHIC!);
     const source = findAssociatedAddress({ mint, owner: authority.publicKey });
     const destination = findAssociatedAddress({ mint, owner });
 
@@ -59,6 +61,8 @@ const handler = async (req: NextApiRequest): HandlerResult => {
             })
         )
     ).toString('base64');
+
+    await prisma.$disconnect();
 
     return [200, { transactionMessage, checksum }];
 };

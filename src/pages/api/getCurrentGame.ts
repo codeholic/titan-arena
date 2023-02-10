@@ -12,11 +12,17 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
     const currentGame = await prisma.game.findFirst({ where: { opensAt: { lte: now }, endsAt: { gt: now } } });
     if (!currentGame) {
+        await prisma.$disconnect();
+
         return [404, { message: 'No current game.' }];
     }
 
     const clanStats = await getStats(prisma, currentGame.id);
-    const { nfts, playerStats, pendingReward }: { nfts?: (Nft & { quests: Quest[] })[]; playerStats?: Stats[]; pendingReward?: bigint } = !player
+    const {
+        nfts,
+        playerStats,
+        pendingReward,
+    }: { nfts?: (Nft & { quests: Quest[] })[]; playerStats?: Stats[]; pendingReward?: bigint } = !player
         ? {}
         : await (async () => {
               const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);
@@ -32,7 +38,9 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
               return { nfts, playerStats, pendingReward };
           })();
-    
+
+    await prisma.$disconnect();
+
     return [
         200,
         {
