@@ -20,7 +20,7 @@ export const ClanCardList = () => {
         getEarnings(clanStats, playerStats);
 
     const playerStatsMap = playerStats?.reduce(
-        (result: Record<number, Stats>, stats: Stats) => ({ [stats.clanId]: stats }),
+        (result: Record<number, Stats>, stats: Stats) => ({ [stats.clanId]: stats, ...result }),
         {}
     );
 
