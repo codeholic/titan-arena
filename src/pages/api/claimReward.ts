@@ -2,6 +2,7 @@ import { sha512 } from '@noble/hashes/sha512';
 import { PrismaClient } from '@prisma/client';
 import { Connection, Keypair, Message, PublicKey, Transaction } from '@solana/web3.js';
 import { NextApiRequest } from 'next';
+import { ApiError } from 'next/dist/server/api-utils';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 import { getOwnedTokenMints, sign } from '../../lib/utils';
 
@@ -31,13 +32,13 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     ).toString('base64');
 
     if (checksum !== params.checksum) {
-        return [400, { message: 'Wrong checksum.' }];
+        throw new ApiError(400, 'Wrong checksum.');
     }
 
     const solanaTx = Transaction.populate(Message.from(Buffer.from(transactionMessage, 'base64')), []);
 
     if (!solanaTx.feePayer) {
-        return [400, { message: 'Invalid transaction.' }];
+        throw new ApiError(400, 'Invalid transaction.');
     }
 
     const owner: PublicKey = solanaTx.feePayer!;
@@ -47,79 +48,85 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const ownedTokenMints = new Set(await getOwnedTokenMints({ connection, owner }));
 
     if (mints.some((mint) => !ownedTokenMints.has(mint))) {
-        return [400, { message: 'Unauthorized user.' }];
+        throw new ApiError(400, 'Unauthorized user.');
     }
 
     const lockedMints: Set<string> = new Set();
 
     const games = await prisma.game.findMany({ where: { endsAt: { lte: claimedAt } } });
 
-    const result: HandlerResult = prisma
-        .$transaction(async (tx) => {
-            const nfts = await tx.nft.findMany({
-                where: { mint: { in: mints } },
-                include: { quests: { where: { gameId: { in: games.map(({ id }) => id) } } } },
-            });
+    return (
+        prisma
+            .$transaction(async (tx) => {
+                const nfts = await tx.nft.findMany({
+                    where: { mint: { in: mints } },
+                    include: { quests: { where: { gameId: { in: games.map(({ id }) => id) } } } },
+                });
 
-            if (nfts.length != mints.length) {
-                return Promise.reject([400, { message: 'Unknown mints.' }]);
-            }
-
-            nfts.forEach(({ mint, quests }) => {
-                if (quests.some(({ rewardClaimedAt }) => !rewardClaimedAt)) {
-                    lockedMints.add(mint);
+                if (nfts.length != mints.length) {
+                    throw new ApiError(400, 'Unknown mints.');
                 }
-            });
 
-            if (nfts.some(({ lockedAt, mint }) => lockedMints.has(mint) && lockedAt)) {
-                return Promise.reject([400, { message: 'Another transaction is running.' }]);
-            }
+                nfts.forEach(({ mint, quests }) => {
+                    if (quests.some(({ rewardClaimedAt }) => !rewardClaimedAt)) {
+                        lockedMints.add(mint);
+                    }
+                });
 
-            tx.nft.updateMany({
-                where: {
-                    mint: {
-                        in: [...lockedMints],
+                if (nfts.some(({ lockedAt, mint }) => lockedMints.has(mint) && lockedAt)) {
+                    throw new ApiError(400, 'Another transaction is running.');
+                }
+
+                tx.nft.updateMany({
+                    where: {
+                        mint: {
+                            in: [...lockedMints],
+                        },
                     },
-                },
-                data: { lockedAt: new Date() },
-            });
-        })
-        .then(async () => {
-            const authority = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.AUTHORITY_PRIVATE_KEY!)));
+                    data: { lockedAt: new Date() },
+                });
+            })
+            .then(async () => {
+                const authority = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.AUTHORITY_PRIVATE_KEY!)));
 
-            solanaTx.addSignature(owner, Buffer.from(params.signature, 'base64'));
-            solanaTx.addSignature(
-                authority.publicKey,
-                Buffer.from(sign(Buffer.from(transactionMessage, 'base64'), authority.secretKey))
-            );
+                solanaTx.addSignature(owner, Buffer.from(params.signature, 'base64'));
+                solanaTx.addSignature(
+                    authority.publicKey,
+                    Buffer.from(sign(Buffer.from(transactionMessage, 'base64'), authority.secretKey))
+                );
 
-            const signature = await connection.sendRawTransaction(solanaTx.serialize());
-            const latestBlockhash = await connection.getLatestBlockhash();
+                const signature = await connection.sendRawTransaction(solanaTx.serialize());
+                const latestBlockhash = await connection.getLatestBlockhash();
 
-            return connection.confirmTransaction({ signature, ...latestBlockhash }).then(({ value: { err } }) =>
-                err
-                    ? Promise.reject([500, { message: 'Transaction error.' }])
-                    : prisma
-                          .$transaction(
-                              [...lockedMints].map((mint) =>
-                                  prisma.nft.update({
-                                      where: { mint },
-                                      data: {
-                                          quests: {
-                                              updateMany: {
-                                                  where: { gameId: { in: games.map(({ id }) => id) } },
-                                                  data: { rewardClaimedAt: claimedAt },
-                                              },
-                                          },
-                                      },
-                                  })
-                              )
-                          )
-                          .then(() => [200, {}])
-            );
-        });
+                const {
+                    value: { err },
+                } = await connection.confirmTransaction({ signature, ...latestBlockhash });
 
-    return result.finally(async () => {
+                if (err) {
+                    throw new ApiError(500, 'Transaction error.');
+                }
+
+                await prisma.$connect();
+
+                return prisma
+                    .$transaction(
+                        [...lockedMints].map((mint) =>
+                            prisma.nft.update({
+                                where: { mint },
+                                data: {
+                                    quests: {
+                                        updateMany: {
+                                            where: { gameId: { in: games.map(({ id }) => id) } },
+                                            data: { rewardClaimedAt: claimedAt },
+                                        },
+                                    },
+                                },
+                            })
+                        )
+                    )
+                    .then(() => [200, {}]);
+            }) as HandlerResult
+    ).finally(async () => {
         await prisma.$connect();
 
         await prisma.nft.updateMany({ where: { mint: { in: mints } }, data: { lockedAt: null } });

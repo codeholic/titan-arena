@@ -1,6 +1,7 @@
 import { Nft, PrismaClient, Quest } from '@prisma/client';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { NextApiRequest } from 'next';
+import { ApiError } from 'next/dist/server/api-utils';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 import { GetCurrentGameResult, Stats } from '../../lib/types';
 import { getStats, getOwnedTokenMints, calculatePendingReward } from '../../lib/utils';
@@ -12,7 +13,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
     const currentGame = await prisma.game.findFirst({ where: { opensAt: { lte: now }, endsAt: { gt: now } } });
     if (!currentGame) {
-        return [404, { message: 'No current game.' }];
+        throw new ApiError(404, 'No current game.');
     }
 
     const clanStats = await getStats(prisma, currentGame.id);

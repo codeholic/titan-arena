@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { createTransferCheckedInstruction, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { NextApiRequest } from 'next';
+import { ApiError } from 'next/dist/server/api-utils';
 import { MYTHIC_DECIMALS } from '../../lib/constants';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 import { calculatePendingReward, findAssociatedAddress } from '../../lib/utils';
@@ -18,7 +19,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
     const amount = await calculatePendingReward(prisma, claimedAt, mints);
     if (amount === BigInt(0)) {
-        return [422, 'No reward to claim.'];
+        throw new ApiError(404, 'No reward to claim.');
     }
 
     const salt = process.env.TRANSACTION_MESSAGE_CHECKSUM_SALT!;

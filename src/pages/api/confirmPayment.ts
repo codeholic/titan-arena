@@ -2,6 +2,7 @@ import { sha512 } from '@noble/hashes/sha512';
 import { Game, PrismaClient } from '@prisma/client';
 import { Connection, Message, Transaction } from '@solana/web3.js';
 import type { NextApiRequest } from 'next';
+import { ApiError } from 'next/dist/server/api-utils';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 
 import { calculateQuestPoints, getOwnedTokenMints } from '../../lib/utils';
@@ -22,12 +23,12 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const checksum = Buffer.from(sha512(params.transactionMessage + params.mints.length + salt)).toString('base64');
 
     if (checksum !== params.checksum) {
-        return [400, { message: 'Wrong checksum.' }];
+        throw new ApiError(400, 'Wrong checksum.');
     }
 
     const solanaTx = Transaction.populate(Message.from(Buffer.from(params.transactionMessage, 'base64')), []);
     if (!solanaTx.feePayer) {
-        return [400, { message: 'Invalid transaction.' }];
+        throw new ApiError(400, 'Invalid transaction.');
     }
 
     const endpoint = process.env.NEXT_PUBLIC_CLUSTER_API_URL!;
@@ -36,7 +37,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const ownedTokenMints = await getOwnedTokenMints({ connection, owner: solanaTx.feePayer! });
 
     if (params.mints.some((mint) => !ownedTokenMints.includes(mint))) {
-        return [400, { message: 'Unauthorized user.' }];
+        throw new ApiError(400, 'Unauthorized user.');
     }
 
     const now = new Date();
@@ -45,7 +46,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     await prisma.$transaction(async (tx) => {
         currentGame = await tx.game.findFirst({ where: { opensAt: { lte: now }, endsAt: { gt: now } } });
         if (!currentGame) {
-            return [404, { message: 'No current game.' }];
+            throw new ApiError(400, 'No current game.');
         }
 
         const nfts = await tx.nft.findMany({
@@ -54,11 +55,11 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
         });
 
         if (params.mints.length !== nfts.length) {
-            return [400, { message: 'Unknown mints.' }];
+            throw new ApiError(400, 'Unknown mints.');
         }
 
         if (nfts.some(({ quests }) => !!quests.length)) {
-            return [400, { message: 'Duplicate quests.' }];
+            throw new ApiError(400, 'Duplicate quests.');
         }
 
         await tx.nft.updateMany({ where: { mint: { in: params.mints } }, data: { lockedAt: new Date() } });
@@ -75,7 +76,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
             } = await connection.confirmTransaction({ signature, ...latestBlockhash });
 
             if (err) {
-                return [422, 'Transaction error.'];
+                throw new ApiError(500, 'Transaction error.');
             }
 
             await prisma.$connect();
