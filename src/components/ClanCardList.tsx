@@ -5,6 +5,7 @@ import { formatAmount, getEarnings } from '../lib/utils';
 import { DataContext } from '../pages';
 import { WithdrawWidget } from './WithdrawWidget';
 import { MYTHIC_DECIMALS, SOL_DECIMALS } from '../lib/constants';
+import { Stats } from '../lib/types';
 
 export const ClanCardList = () => {
     const theme = useTheme();
@@ -17,6 +18,11 @@ export const ClanCardList = () => {
 
     const { totalPaid, totalEarned, clanEarnings, firstPlace, lastPlace, playerPaid, playerEarnings, playerEarned } =
         getEarnings(clanStats, playerStats);
+
+    const playerStatsMap = playerStats?.reduce(
+        (result: Record<number, Stats>, stats: Stats) => ({ [stats.clanId]: stats }),
+        {}
+    );
 
     return (
         <Grid container columns={{ xs: 2, md: 4 }} my={1} spacing={2}>
@@ -127,7 +133,7 @@ export const ClanCardList = () => {
                                 Total:
                             </Grid>
                             <Grid item xs={1}>
-                                {playerStats ? String(playerStats[index].total) : '?'}/
+                                {playerStatsMap ? String(playerStatsMap?.[clanId]?.total ?? 0) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(total)}
                             </Grid>
 
@@ -135,7 +141,7 @@ export const ClanCardList = () => {
                                 Questing:
                             </Grid>
                             <Grid item xs={1}>
-                                {playerStats ? String(playerStats[index].played) : '?'}/
+                                {playerStatsMap ? String(playerStatsMap?.[clanId]?.played ?? 0) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(played)}
                             </Grid>
 
@@ -143,7 +149,7 @@ export const ClanCardList = () => {
                                 Points:
                             </Grid>
                             <Grid item xs={1}>
-                                {playerStats ? String(playerStats[index].points) : '?'}/
+                                {playerStatsMap ? String(playerStatsMap?.[clanId]?.points ?? 0) : '?'}/
                                 {/* FIXME: https://github.com/facebook/react/pull/24580 */ String(points)}
                             </Grid>
 
