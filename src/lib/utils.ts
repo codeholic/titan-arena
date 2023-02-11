@@ -137,7 +137,10 @@ export const getEarnings = (
     const playerPaid = playerPlayed === undefined ? undefined : playerPlayed * LAMPORTS_PER_NFT;
 
     const playerEarnings =
-        playerStats && clanStats.map(({ points }, index) => points ? (playerStats[index].points * clanEarnings[index]) / points : BigInt(0));
+        playerStats &&
+        clanStats.map(({ points }, index) =>
+            points ? (playerStats[index].points * clanEarnings[index]) / points : BigInt(0)
+        );
 
     const playerEarned = playerEarnings && playerEarnings.reduce((result, share) => result + share, BigInt(0));
 
