@@ -12,8 +12,6 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
     const currentGame = await prisma.game.findFirst({ where: { opensAt: { lte: now }, endsAt: { gt: now } } });
     if (!currentGame) {
-        await prisma.$disconnect();
-
         return [404, { message: 'No current game.' }];
     }
 
@@ -38,8 +36,6 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
               return { nfts, playerStats, pendingReward };
           })();
-
-    await prisma.$disconnect();
 
     return [
         200,

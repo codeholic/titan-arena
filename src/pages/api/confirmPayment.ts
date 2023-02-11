@@ -107,8 +107,6 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
         await prisma.$connect();
 
         await prisma.nft.updateMany({ where: { mint: { in: params.mints } }, data: { lockedAt: null } });
-
-        await prisma.$disconnect();
     });
 };
 

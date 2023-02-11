@@ -13,7 +13,7 @@ interface ClaimRewardParams {
     transactionMessage: string;
 }
 
-const handler = async (req: NextApiRequest): HandlerResult => {
+const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
     const params: ClaimRewardParams = req.body;
     const { claimedAt, mints, transactionMessage } = params;
 
@@ -49,8 +49,6 @@ const handler = async (req: NextApiRequest): HandlerResult => {
     if (mints.some((mint) => !ownedTokenMints.has(mint))) {
         return [400, { message: 'Unauthorized user.' }];
     }
-
-    const prisma = new PrismaClient();
 
     const lockedMints: Set<string> = new Set();
 
@@ -125,8 +123,6 @@ const handler = async (req: NextApiRequest): HandlerResult => {
         await prisma.$connect();
 
         await prisma.nft.updateMany({ where: { mint: { in: mints } }, data: { lockedAt: null } });
-
-        await prisma.$disconnect();
     });
 };
 

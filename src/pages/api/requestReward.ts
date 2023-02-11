@@ -13,15 +13,11 @@ interface RequestRewardParams {
     player: string;
 }
 
-const handler = async (req: NextApiRequest): HandlerResult => {
+const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
     const { claimedAt, mints, player }: RequestRewardParams = req.body;
-
-    const prisma = new PrismaClient();
 
     const amount = await calculatePendingReward(prisma, claimedAt, mints);
     if (amount === BigInt(0)) {
-        await prisma.$disconnect();
-
         return [422, 'No reward to claim.'];
     }
 
@@ -61,8 +57,6 @@ const handler = async (req: NextApiRequest): HandlerResult => {
             })
         )
     ).toString('base64');
-
-    await prisma.$disconnect();
 
     return [200, { transactionMessage, checksum }];
 };
