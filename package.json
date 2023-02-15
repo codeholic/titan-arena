@@ -31,7 +31,7 @@
         "dev": "NODE_OPTIONS='--inspect' next dev",
         "start": "next start",
         "lint": "prettier --check 'src/{*,**/*}.{ts,tsx,js,jsx,json}' && eslint && next lint",
-        "deploy": "ssh ubuntu@titanarena.dao2go.com pm2 stop titanarena && rsync -av --exclude=.next/cache .next ubuntu@titanarena.dao2go.com:titan-arena/ && ssh ubuntu@titanarena.dao2go.com pm2 start titanarena"
+        "deploy": "ssh ubuntu@quests.titanarena.app pm2 stop titanarena && rsync -av --exclude=.next/cache .next ubuntu@quests.titanarena.app:titan-arena/ && ssh ubuntu@quests.titanarena.app pm2 start titanarena"
     },
     "dependencies": {
         "@emotion/react": "^11.10.5",
