@@ -6,6 +6,7 @@ import { DataContext } from '../pages';
 import { WithdrawWidget } from './WithdrawWidget';
 import { MYTHIC_DECIMALS, SOL_DECIMALS } from '../lib/constants';
 import { Stats } from '../lib/types';
+import { formatDistance } from 'date-fns';
 
 export const ClanCardList = () => {
     const theme = useTheme();
@@ -45,14 +46,14 @@ export const ClanCardList = () => {
                             Game Start:
                         </Grid>
                         <Grid item xs={1}>
-                            {currentGame.startsAt.toLocaleString('en-US')}
+                            {formatDistance(currentGame.startsAt, new Date(), { addSuffix: true })}
                         </Grid>
 
                         <Grid item xs={1} sx={{ pr: 1 }}>
                             Game End:
                         </Grid>
                         <Grid item xs={1}>
-                            {currentGame.endsAt.toLocaleString('en-US')}
+                            {formatDistance(currentGame.endsAt, new Date(), { addSuffix: true })}
                         </Grid>
 
                         <Grid item xs={1} sx={{ pr: 1 }}>

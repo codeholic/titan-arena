@@ -45,6 +45,7 @@
         "@solana/wallet-adapter-material-ui": "^0.16.25",
         "@solana/wallet-adapter-react": "^0.15.26",
         "@solana/wallet-adapter-wallets": "^0.19.9",
+        "date-fns": "^2.29.3",
         "firebase-admin": "^11.5.0",
         "next": "^12.2.5",
         "react": "^18.0.0",
