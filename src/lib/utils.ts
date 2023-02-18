@@ -77,7 +77,7 @@ export const calculateQuestPoints = (game: Game, clanMultiplier: number, started
             ? 1
             : (game.endsAt.valueOf() - startedAt.valueOf()) / (game.endsAt.valueOf() - game.startsAt.valueOf());
 
-    return Math.ceil(BASE_POINTS * durationMultiplier * clanMultiplier);
+    return Math.ceil(Number((BASE_POINTS * durationMultiplier * clanMultiplier).toFixed(6)));
 };
 
 const WINNERS_SHARE_PERCENT = BigInt(70);

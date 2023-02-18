@@ -127,7 +127,7 @@ export const ClanCardList = () => {
                                 Multiplier:
                             </Grid>
                             <Grid item xs={1}>
-                                {clanMultiplier * 100}%
+                                {Math.round(clanMultiplier * 100)}%
                             </Grid>
 
                             <Grid item xs={1} sx={{ pr: 1 }}>
