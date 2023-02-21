@@ -55,6 +55,8 @@ model Trait {
   name  String
   nfts  Nft[]
   value String
+
+  @@unique([name, value])
 }
 
 model Quest {
