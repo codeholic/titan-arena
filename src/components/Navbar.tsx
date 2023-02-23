@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Box, Stack } from '@mui/material';
 
 import BackIcon from '@mui/icons-material/Reply';
+import PartyPopperIcon from '@mui/icons-material/Celebration';
 import CupIcon from '@mui/icons-material/EmojiEvents';
 
 const WalletMultiButtonDynamic = dynamic(
@@ -12,9 +13,13 @@ const WalletMultiButtonDynamic = dynamic(
 );
 
 import { MenuItem, MenuItemProps } from './MenuItem';
-import { ReloadButton } from './ReloadButton';
+import { ReloadButton, ReloadButtonProps } from './ReloadButton';
 
-export const Navbar = () => {
+interface NavbarProps extends ReloadButtonProps {
+    active: string;
+}
+
+export const Navbar = ({ active, ...props }: NavbarProps) => {
     const menuItemProps: MenuItemProps[] = [
         {
             href: 'https://dashboard.titanarena.app',
@@ -22,10 +27,16 @@ export const Navbar = () => {
             children: 'Dashboard',
         },
         {
+            name: 'quests',
             href: '/',
             icon: <CupIcon sx={{ mr: 1, mb: '5px' }} />,
-            isActive: true,
             children: 'Quests',
+        },
+        {
+            name: 'raffle',
+            href: '/raffle',
+            icon: <PartyPopperIcon sx={{ mr: 1, mb: '5px' }} />,
+            children: 'Raffle',
         },
     ];
 
@@ -43,6 +54,8 @@ export const Navbar = () => {
             }}
         >
             {menuItemProps.map((props, index) => {
+                props = { isActive: active === props.name, ...props };
+
                 return index < menuItemProps.length - 1 ? (
                     <MenuItem key={index} {...props} />
                 ) : (
@@ -53,7 +66,7 @@ export const Navbar = () => {
             })}
 
             <Stack direction="row" spacing={1}>
-                <ReloadButton />
+                <ReloadButton {...props} />
 
                 <WalletMultiButtonDynamic />
             </Stack>

@@ -39,9 +39,9 @@ const Home: NextPage = () => {
                     sx={{ maxWidth: { lg: '500px', xs: '50%' }, mx: 'auto', my: { lg: '40px', xs: '25px' } }}
                 />
 
-                <DataContext.Provider value={context}>
-                    <Navbar />
+                <Navbar active="quests" isLoading={context.isLoading} reload={context.reload} />
 
+                <DataContext.Provider value={context}>
                     <ClanCardList />
 
                     <QuestWidget />

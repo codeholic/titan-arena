@@ -26,14 +26,14 @@ const env = require('@next/env');
             where: { mint },
             data: {
                 traits: {
-                    connect: (await prisma.trait.findMany({
+                    connect: await prisma.trait.findMany({
                         select: { id: true },
                         where: {
-                            OR: attributes.map(({ trait_type: name, value }: Attribute) => ({ name, value }))
-                        }
-                    }))
-                }
-            }
-        })
+                            OR: attributes.map(({ trait_type: name, value }: Attribute) => ({ name, value })),
+                        },
+                    }),
+                },
+            },
+        });
     }
 })();
