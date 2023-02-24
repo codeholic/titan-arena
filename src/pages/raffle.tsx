@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import React, { useState } from 'react';
 
-import { Box, Button, CardMedia, Container, Grid, Stack, TextField, Typography, useTheme } from '@mui/material';
+import { Box, Button, CardMedia, Container, Grid, Link, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { Navbar } from '../components/Navbar';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Message, Transaction } from '@solana/web3.js';
@@ -123,7 +123,9 @@ const Raffle: NextPage = () => {
                 {raffle && (
                     <Grid container my={1} columns={{ xs: 1, sm: 2 }} spacing={2}>
                         <Grid item xs={1}>
-                            <CardMedia image={raffle.imageUrl} sx={{ aspectRatio: '1/1', borderRadius: '5px' }} />
+                            <Link href={raffle.linkUrl} target="_blank">
+                                <CardMedia image={raffle.imageUrl} sx={{ aspectRatio: '1/1', borderRadius: '20px' }} />
+                            </Link>
                         </Grid>
                         <Grid item xs={1}>
                             <Box
