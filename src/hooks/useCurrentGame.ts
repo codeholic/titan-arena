@@ -10,6 +10,7 @@ export type UseCurrentGameResult = GetCurrentGameResult & {
     currentGame?: Game;
     clanStats?: Stats[];
     isLoading: boolean;
+    isValidating: boolean;
     nfts?: Nft & { quests: Quest[] };
     pendingReward?: bigint;
     playerStats?: Stats[];
@@ -31,5 +32,5 @@ export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult =
         mutate: reload,
     } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args));
 
-    return { ...((data as Object) || {}), isLoading: isLoading || isValidating, reload };
+    return { ...((data as Object) || {}), isLoading, isValidating, reload };
 };

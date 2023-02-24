@@ -7,6 +7,7 @@ import { GetRaffleResult } from '../lib/types';
 
 interface UseRaffleResult extends GetRaffleResult {
     isLoading: boolean;
+    isValidating: boolean;
     reload: Function;
 }
 
@@ -25,5 +26,5 @@ export const useRaffle = (buyer: PublicKey | null): UseRaffleResult => {
         mutate: reload,
     } = useSWR(['/api/getRaffle', buyer?.toBase58()], (args) => fetcher(...args));
 
-    return { ...((data as Object) || {}), isLoading: isLoading || isValidating, reload };
+    return { ...((data as Object) || {}), isLoading, isValidating, reload };
 };

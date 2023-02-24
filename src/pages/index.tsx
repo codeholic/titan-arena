@@ -15,6 +15,7 @@ export const DataContext = createContext({
     currentGame: undefined,
     clanStats: undefined,
     isLoading: false,
+    isValidating: false,
     nfts: undefined,
     playerStats: undefined,
     reload: () => {},
@@ -39,7 +40,7 @@ const Home: NextPage = () => {
                     sx={{ maxWidth: { lg: '500px', xs: '50%' }, mx: 'auto', my: { lg: '40px', xs: '25px' } }}
                 />
 
-                <Navbar active="quests" isLoading={context.isLoading} reload={context.reload} />
+                <Navbar active="quests" isLoading={context.isLoading || context.isValidating} reload={context.reload} />
 
                 <DataContext.Provider value={context}>
                     <ClanCardList />
