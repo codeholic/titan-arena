@@ -153,7 +153,7 @@ const Raffle: NextPage = () => {
 
                                     {wallet.connected && <Box>Your tickets: {!batch ? 0 : batch.ticketCount}</Box>}
 
-                                    <Box>Ticket price: {formatAmount(raffle.ticketPrice, MYTHIC_DECIMALS)} MYTHIC</Box>
+                                    <Box>Ticket price: {formatAmount(raffle.ticketPrice, MYTHIC_DECIMALS)} DUSA</Box>
                                 </Typography>
 
                                 {wallet.connected && (

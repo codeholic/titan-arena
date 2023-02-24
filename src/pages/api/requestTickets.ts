@@ -30,7 +30,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
 
     const amount = BigInt(raffle.ticketPrice) * BigInt(ticketCount);
 
-    const mint = new PublicKey(process.env.NEXT_PUBLIC_MYTHIC!);
+    const mint = new PublicKey(process.env.NEXT_PUBLIC_DUSA!);
     const source = findAssociatedAddress({ mint, owner });
     const destination = findAssociatedAddress({ mint, owner: prizePool });
 
