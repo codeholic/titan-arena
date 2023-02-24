@@ -86,6 +86,7 @@ model Raffle {
 model Batch {
   id          Int     @id @default(autoincrement())
   buyer       String
+  lockedAt    DateTime?
   raffle      Raffle  @relation(fields: [raffleId], references: [id])
   raffleId    Int
   ticketCount Int

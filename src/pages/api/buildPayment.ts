@@ -10,11 +10,6 @@ type BuildPaymentParams = {
     nftCount: number;
 };
 
-export type BuildPaymentResult = {
-    transactionMessage: string;
-    checksum: string;
-};
-
 const handler = async (req: NextApiRequest): HandlerResult => {
     const params: BuildPaymentParams = req.body;
 

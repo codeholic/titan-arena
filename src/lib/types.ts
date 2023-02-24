@@ -20,3 +20,8 @@ export interface GetRaffleResult {
     raffle?: Raffle & { ticketPrice: bigint; ticketsSold: number };
     batch?: Batch;
 }
+
+export interface BuildTransactionResult {
+    transactionMessage: string;
+    checksum: string;
+}

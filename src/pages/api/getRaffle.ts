@@ -9,7 +9,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const raffle = await prisma.raffle.findFirst({ orderBy: { id: 'desc' } });
     const ticketsSold = !raffle
         ? null
-        : (await prisma.batch.aggregate({ _sum: { ticketCount: true }, where: { raffle } }))._sum?.ticketCount;
+        : (await prisma.batch.aggregate({ _sum: { ticketCount: true }, where: { raffle } }))._sum?.ticketCount || 0;
 
     const batch =
         !buyer || !raffle

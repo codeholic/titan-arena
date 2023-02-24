@@ -1,18 +1,6 @@
 import CheckboxCheckedIcon from '@mui/icons-material/CheckBox';
 import CheckboxBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogContent,
-    Grid,
-    Skeleton,
-    Stack,
-    ToggleButton,
-    useMediaQuery,
-    useTheme,
-} from '@mui/material';
+import { Box, Button, Grid, Skeleton, ToggleButton, useMediaQuery, useTheme } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -20,9 +8,9 @@ import { DataContext } from '../pages';
 import NftCard from './NftCard';
 import { Message, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
-import { BuildPaymentResult } from '../pages/api/buildPayment';
 import superjson from 'superjson';
 import { Spinner } from './Spinner';
+import { BuildTransactionResult } from '../lib/types';
 
 export const NftCardList = () => {
     const wallet = useWallet();
@@ -99,7 +87,7 @@ export const NftCardList = () => {
                             return Promise.reject(result);
                         }
 
-                        const { transactionMessage, checksum } = result as BuildPaymentResult;
+                        const { transactionMessage, checksum } = result as BuildTransactionResult;
 
                         const transaction = Transaction.populate(
                             Message.from(Buffer.from(transactionMessage, 'base64')),
@@ -130,7 +118,6 @@ export const NftCardList = () => {
 
                                               toast.success('Titans have embarked on a quest!');
 
-                                              setIsSubmitting(false);
                                               reset({ nfts: {} });
                                           })
                                   )

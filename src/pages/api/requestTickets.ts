@@ -1,15 +1,16 @@
 import { sha512 } from '@noble/hashes/sha512';
 import { PrismaClient } from '@prisma/client';
-import { createTransferCheckedInstruction, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
-import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import { createTransferCheckedInstruction } from '@solana/spl-token';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { NextApiRequest } from 'next';
+import { ApiError } from 'next/dist/server/api-utils';
 import { MYTHIC_DECIMALS } from '../../lib/constants';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
 import { findAssociatedAddress } from '../../lib/utils';
 
 interface RequestRewardParams {
     raffleId: number;
-    ticketCount: bigint;
+    ticketCount: number;
     buyer: string;
 }
 
@@ -24,7 +25,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const raffle = await prisma.raffle.findUnique({ where: { id: raffleId } });
 
     if (!raffle) {
-        return [400, { message: 'Unknown raffle.' }];
+        throw new ApiError(400, 'Unknown raffle.');
     }
 
     const amount = BigInt(raffle.ticketPrice) * BigInt(ticketCount);
@@ -34,10 +35,6 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const destination = findAssociatedAddress({ mint, owner: prizePool });
 
     const transaction = new Transaction();
-
-    if (!(await connection.getAccountInfo(destination))) {
-        transaction.add(createAssociatedTokenAccountInstruction(owner, destination, owner, mint));
-    }
 
     transaction.add(createTransferCheckedInstruction(source, mint, destination, owner, amount, MYTHIC_DECIMALS));
 

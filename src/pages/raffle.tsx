@@ -3,14 +3,19 @@ import Head from 'next/head';
 import React, { useState } from 'react';
 
 import { Box, Button, CardMedia, Container, Grid, Stack, TextField, Typography, useTheme } from '@mui/material';
-import { InfoBox } from '../components/InfoBox';
 import { Navbar } from '../components/Navbar';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { Message, Transaction } from '@solana/web3.js';
 import { useRaffle } from '../hooks/useRaffle';
 import { formatAmount } from '../lib/utils';
 import { MYTHIC_DECIMALS } from '../lib/constants';
 import { formatDistance } from 'date-fns';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import fetch from 'node-fetch';
+import superjson from 'superjson';
+import { BuildTransactionResult } from '../lib/types';
+import { Spinner } from '../components/Spinner';
 
 const Raffle: NextPage = () => {
     const wallet = useWallet();
@@ -18,13 +23,84 @@ const Raffle: NextPage = () => {
     const theme = useTheme();
 
     const { raffle, batch, isLoading, isValidating, reload } = useRaffle(wallet.publicKey);
-    const { handleSubmit, register } = useForm();
+    const { control, handleSubmit, register, reset } = useForm();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const ticketCount = useWatch({ control, name: 'ticketCount', defaultValue: 0 });
+
     const onSubmit = async () => {
+        if (!wallet.publicKey || !raffle || ticketCount === 0) {
+            return;
+        }
+
         setIsSubmitting(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => setIsSubmitting(false));
+
+        const raffleId = raffle.id;
+        const buyer = wallet.publicKey.toBase58();
+
+        await fetch('/api/requestTickets', {
+            method: 'POST',
+            body: JSON.stringify({
+                raffleId,
+                ticketCount,
+                buyer,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+            .then((data) =>
+                data
+                    .text()
+                    .then(superjson.parse)
+                    .catch(() => Promise.reject({ message: 'Internal server error.' }))
+                    .then((result) => {
+                        if (!data.ok) {
+                            return Promise.reject(result);
+                        }
+
+                        const { transactionMessage, checksum } = result as BuildTransactionResult;
+
+                        const transaction = Transaction.populate(
+                            Message.from(Buffer.from(transactionMessage, 'base64')),
+                            []
+                        );
+
+                        return wallet.signTransaction!(transaction).then(({ signature }) =>
+                            !signature
+                                ? Promise.reject('No signature.')
+                                : fetch('/api/claimTickets', {
+                                      method: 'POST',
+                                      body: JSON.stringify({
+                                          raffleId,
+                                          ticketCount,
+                                          transactionMessage,
+                                          checksum,
+                                          signature: signature.toString('base64'),
+                                      }),
+                                      headers: { 'Content-Type': 'application/json' },
+                                  }).then((data) =>
+                                      data
+                                          .text()
+                                          .then(superjson.parse)
+                                          .catch(() => Promise.reject({ message: 'Internal server error.' }))
+                                          .then((result) => {
+                                              if (!data.ok) {
+                                                  return Promise.reject(result);
+                                              }
+
+                                              toast.success('Tickets have been bought!');
+
+                                              reset({ ticketCount: '' });
+                                          })
+                                  )
+                        );
+                    })
+            )
+            .catch((err) => toast.error(err.message))
+            .finally(() => {
+                setIsSubmitting(false);
+                reload();
+            });
     };
 
     return (
@@ -83,7 +159,7 @@ const Raffle: NextPage = () => {
                                 {wallet.connected && (
                                     <form onSubmit={handleSubmit(onSubmit)}>
                                         <Stack my={2} direction="row" spacing={2}>
-                                            <TextField sx={{ width: '5em' }} />
+                                            <TextField sx={{ width: '5em' }} {...register(`ticketCount`)} />
 
                                             <Button type="submit" variant="contained" disabled={isSubmitting}>
                                                 Buy tickets
@@ -91,6 +167,8 @@ const Raffle: NextPage = () => {
                                         </Stack>
                                     </form>
                                 )}
+
+                                <Spinner open={isSubmitting}>Tickets are being bought...</Spinner>
                             </Box>
                         </Grid>
                     </Grid>

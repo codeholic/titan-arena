@@ -8,6 +8,7 @@ import { DataContext } from '../pages';
 import superjson from 'superjson';
 import { toast } from 'react-hot-toast';
 import { Spinner } from './Spinner';
+import { BuildTransactionResult } from '../lib/types';
 
 export const WithdrawWidget = () => {
     const wallet = useWallet();
@@ -45,10 +46,7 @@ export const WithdrawWidget = () => {
                             return Promise.reject(result);
                         }
 
-                        const { transactionMessage, checksum } = result as {
-                            transactionMessage: string;
-                            checksum: string;
-                        };
+                        const { transactionMessage, checksum } = result as BuildTransactionResult;
 
                         const transaction = Transaction.populate(
                             Message.from(Buffer.from(transactionMessage, 'base64')),
