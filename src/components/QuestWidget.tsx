@@ -1,19 +1,9 @@
-import { Box, BoxProps, styled, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
 import { DataContext } from '../pages';
 import { NftCardList } from './NftCardList';
-
-const InfoBox = styled(Box)<BoxProps>(({ theme }) => ({
-    margin: '20px 0',
-    padding: '50px',
-    boxShadow: 'inset 0 0 0 2px rgba(255, 255, 255, 0.1)',
-    borderRadius: '5px',
-    fontFamily: theme.typography.button.fontFamily,
-    fontSize: '20px',
-    textTransform: 'uppercase',
-    textAlign: 'center',
-}));
+import { InfoBox } from './InfoBox';
 
 export const QuestWidget = () => {
     const wallet = useWallet();

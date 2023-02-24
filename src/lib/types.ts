@@ -1,4 +1,4 @@
-import { Game, Nft, Quest } from '@prisma/client';
+import { Batch, Game, Nft, Quest, Raffle } from '@prisma/client';
 
 export type Stats = {
     clanId: number;
@@ -14,4 +14,9 @@ export interface GetCurrentGameResult {
     clanStats?: Stats[];
     nfts?: (Nft & { quests: Quest[] })[];
     playerStats?: Stats[];
+}
+
+export interface GetRaffleResult {
+    raffle?: Raffle & { ticketPrice: bigint; ticketsSold: number };
+    batch?: Batch;
 }

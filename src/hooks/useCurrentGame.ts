@@ -27,8 +27,9 @@ export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult =
     const {
         data,
         isLoading,
+        isValidating,
         mutate: reload,
     } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args));
 
-    return { ...((data as Object) || {}), isLoading, reload };
+    return { ...((data as Object) || {}), isLoading: isLoading || isValidating, reload };
 };
