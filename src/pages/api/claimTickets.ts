@@ -93,7 +93,7 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     ).finally(async () => {
         await prisma.$connect();
 
-        await prisma.batch.update({ where: { raffleId_buyer: { raffleId, buyer } }, data: { lockedAt: null } });
+        await prisma.batch.updateMany({ where: { raffleId, buyer }, data: { lockedAt: null } });
     });
 };
 

@@ -158,7 +158,7 @@ const Raffle: NextPage = () => {
                                     <Box>Ticket price: {formatAmount(raffle.ticketPrice, MYTHIC_DECIMALS)} DUSA</Box>
                                 </Typography>
 
-                                {wallet.connected && (
+                                {wallet.connected && !!raffle?.endsAt && new Date() < raffle.endsAt && (
                                     <form onSubmit={handleSubmit(onSubmit)}>
                                         <Stack my={2} direction="row" spacing={2}>
                                             <TextField sx={{ width: '5em' }} {...register(`ticketCount`)} />
