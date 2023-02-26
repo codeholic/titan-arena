@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import { Box, Stack } from '@mui/material';
 
 import BackIcon from '@mui/icons-material/Reply';
-import PartyPopperIcon from '@mui/icons-material/Celebration';
 import CupIcon from '@mui/icons-material/EmojiEvents';
 
 const WalletMultiButtonDynamic = dynamic(
@@ -31,12 +30,6 @@ export const Navbar = ({ active, ...props }: NavbarProps) => {
             href: '/',
             icon: <CupIcon sx={{ mr: 1, mb: '5px' }} />,
             children: 'Quests',
-        },
-        {
-            name: 'raffle',
-            href: '/raffle',
-            icon: <PartyPopperIcon sx={{ mr: 1, mb: '5px' }} />,
-            children: 'Raffle',
         },
     ];
 

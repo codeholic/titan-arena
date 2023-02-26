@@ -72,24 +72,3 @@ model Quest {
 
   @@unique([gameId, nftId])
 }
-
-model Raffle {
-  id          Int       @id @default(autoincrement())
-  batches     Batch[]
-  displayName String
-  endsAt      DateTime?
-  imageUrl    String
-  linkUrl     String
-  ticketPrice BigInt
-}
-
-model Batch {
-  id          Int     @id @default(autoincrement())
-  buyer       String
-  lockedAt    DateTime?
-  raffle      Raffle  @relation(fields: [raffleId], references: [id])
-  raffleId    Int
-  ticketCount Int
-
-  @@unique([raffleId, buyer])
-}
