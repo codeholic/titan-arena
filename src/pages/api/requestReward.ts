@@ -15,10 +15,6 @@ interface RequestRewardParams {
 }
 
 const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
-    if (Math.random()) {
-        throw new ApiError(503, 'Temporarily suspended.');
-    }
-
     const { claimedAt, mints, player }: RequestRewardParams = req.body;
 
     const amount = await calculatePendingReward(prisma, claimedAt, mints);
