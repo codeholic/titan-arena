@@ -4,6 +4,7 @@ import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from '@sol
 import type { NextApiRequest } from 'next';
 import { /* findAssociatedAddress, */ LAMPORTS_PER_NFT } from '../../lib/utils';
 import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
+import { ApiError } from 'next/dist/server/api-utils';
 
 type BuildPaymentParams = {
     payer: string;
@@ -11,6 +12,10 @@ type BuildPaymentParams = {
 };
 
 const handler = async (req: NextApiRequest): HandlerResult => {
+    if (Math.random()) {
+        throw new ApiError(503, 'Temporarily suspended.');
+    }
+
     const params: BuildPaymentParams = req.body;
 
     const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);
