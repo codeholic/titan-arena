@@ -1,23 +1,20 @@
-import { sha512 } from '@noble/hashes/sha512';
-import { PrismaClient } from '@prisma/client';
 import { createTransferCheckedInstruction, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import { NextApiRequest } from 'next';
 import { ApiError } from 'next/dist/server/api-utils';
 import { MYTHIC_DECIMALS } from '../../lib/constants';
-import handleJsonResponse, { HandlerResult } from '../../lib/handleJsonResponse';
+import handleRequestTransaction, { RequestTransactionHandlerArgs } from '../../lib/handleRequestTransaction';
+import { RequestRewardPayload } from '../../lib/types';
 import { calculatePendingReward, findAssociatedAddress } from '../../lib/utils';
 
-interface RequestRewardParams {
-    claimedAt: Date;
-    mints: string[];
-    player: string;
-}
+const handler = async ({
+    payload,
+    prisma,
+    signer,
+    timestamp,
+}: RequestTransactionHandlerArgs<RequestRewardPayload>): Promise<Transaction> => {
+    const { mints }: RequestRewardPayload = payload;
 
-const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult => {
-    const { claimedAt, mints, player }: RequestRewardParams = req.body;
-
-    const amount = await calculatePendingReward(prisma, claimedAt, mints);
+    const amount = await calculatePendingReward(prisma, new Date(timestamp), mints);
     if (amount === BigInt(0)) {
         throw new ApiError(404, 'No reward to claim.');
     }
@@ -25,41 +22,22 @@ const handler = async (req: NextApiRequest, prisma: PrismaClient): HandlerResult
     const salt = process.env.TRANSACTION_MESSAGE_CHECKSUM_SALT!;
     const connection = new Connection(process.env.NEXT_PUBLIC_CLUSTER_API_URL!);
     const authority = Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.AUTHORITY_PRIVATE_KEY!)));
-    const owner = new PublicKey(player);
 
     const mint = new PublicKey(process.env.NEXT_PUBLIC_MYTHIC!);
     const source = findAssociatedAddress({ mint, owner: authority.publicKey });
-    const destination = findAssociatedAddress({ mint, owner });
+    const destination = findAssociatedAddress({ mint, owner: signer });
 
     const transaction = new Transaction();
 
     if (!(await connection.getAccountInfo(destination))) {
-        transaction.add(createAssociatedTokenAccountInstruction(owner, destination, owner, mint));
+        transaction.add(createAssociatedTokenAccountInstruction(signer, destination, signer, mint));
     }
 
     transaction.add(
         createTransferCheckedInstruction(source, mint, destination, authority.publicKey, amount, MYTHIC_DECIMALS)
     );
 
-    transaction.feePayer = owner;
-
-    const { blockhash } = await connection.getLatestBlockhash('finalized');
-
-    transaction.recentBlockhash = blockhash;
-
-    const transactionMessage = transaction.serializeMessage().toString('base64');
-    const checksum = Buffer.from(
-        sha512(
-            JSON.stringify({
-                transactionMessage,
-                claimedAt,
-                mints,
-                salt,
-            })
-        )
-    ).toString('base64');
-
-    return [200, { transactionMessage, checksum }];
+    return transaction;
 };
 
-export default handleJsonResponse(handler);
+export default handleRequestTransaction(handler);

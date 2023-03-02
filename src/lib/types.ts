@@ -46,6 +46,11 @@ export type ExecuteTransactionParams<TPayload> = {
     payload: TPayload;
 };
 
+export type RequestRewardPayload = {
+    mints: string[];
+};
+export type ClaimRewardHandlerArgs = ExecuteTransactionHandlerArgs<RequestRewardPayload>;
+
 export type RequestQuestPayload = {
     gameId: number;
     mints: string[];

@@ -8,7 +8,7 @@ import handleJsonResponse, { HandlerResult } from './handleJsonResponse';
 import { ExecuteTransactionHandler, ExecuteTransactionParams } from './types';
 
 type HandleExecuteTransactionArgs<TPayload> = {
-    handler: 'claimQuest';
+    handler: 'claimReward' | 'claimQuest';
     validateAndLock: ExecuteTransactionHandler<TPayload>;
     unlock: ExecuteTransactionHandler<TPayload>;
     signByAuthority: Boolean;

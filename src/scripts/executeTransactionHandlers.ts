@@ -7,10 +7,9 @@ const env = require('@next/env');
 
 const CONFIRMATION_TIMEOUT = 300; // seconds
 
-type Handler = 'claimQuest';
-
-const handlers: Record<Handler, { execute: ExecuteTransactionHandler<any>; unlock: ExecuteTransactionHandler<any> }> = {
+const handlers: Record<string, { execute: ExecuteTransactionHandler<any>; unlock: ExecuteTransactionHandler<any> }> = {
     claimQuest: require('../jobs/claimQuest'),
+    claimReward: require('../jobs/claimReward'),
 };
 
 (async () => {
@@ -26,7 +25,7 @@ const handlers: Record<Handler, { execute: ExecuteTransactionHandler<any>; unloc
         const signer = new PublicKey(job.signer);
         const timestamp = job.timestamp.valueOf();
 
-        const { execute, unlock } = handlers[job.handler as Handler];
+        const { execute, unlock } = handlers[job.handler];
 
         const solanaTx = await connection.getTransaction(job.signature, {
             commitment: 'finalized',
