@@ -42,3 +42,5 @@ yarn-error.log*
 
 /prisma/*.db
 /prisma/*.db-journal
+
+/src/**/*.js

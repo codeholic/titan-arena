@@ -1,4 +1,4 @@
-import { Box, CardMedia, CardMediaProps, Skeleton, styled, useTheme } from '@mui/material';
+import { Box, CardMedia, CardMediaProps, CircularProgress, Skeleton, styled, useTheme } from '@mui/material';
 import { Nft, Quest } from '@prisma/client';
 import { forwardRef, useContext, useEffect, useMemo, useState } from 'react';
 import { calculateQuestPoints } from '../lib/utils';
@@ -60,7 +60,7 @@ const NftCardContent = ({ nft }: NftCardContentProps) => {
 
     return (
         <>
-            {quest?.startedAt && (
+            {quest?.startedAt ? (
                 <Box
                     sx={{
                         position: 'absolute',
@@ -71,6 +71,18 @@ const NftCardContent = ({ nft }: NftCardContentProps) => {
                     }}
                 >
                     Questing
+                </Box>
+            ) : !nft.lockedAt ? null : (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        pt: 1,
+                    }}
+                >
+                    <CircularProgress size={20} />
                 </Box>
             )}
 
@@ -113,7 +125,10 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
 
         useEffect(() => setChecked(defaultChecked), [defaultChecked]);
 
-        const isDisabled = useMemo(() => isSubmitting || isQuesting, [isSubmitting, isQuesting]);
+        const isDisabled = useMemo(
+            () => isSubmitting || isQuesting || !!nft.lockedAt,
+            [isSubmitting, isQuesting, nft.lockedAt]
+        );
 
         return !isLoading ? (
             <>

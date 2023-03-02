@@ -27,7 +27,7 @@
     },
     "scripts": {
         "build": "tsc --build --verbose && next build",
-        "clean": "shx rm -rf .next .swc lib",
+        "clean": "shx rm -rf .next .swc lib && find src/ -name \\*.js -exec rm {} \\;",
         "dev": "NODE_OPTIONS='--inspect' next dev",
         "start": "next start",
         "lint": "prettier --check 'src/{*,**/*}.{ts,tsx,js,jsx,json}' && eslint && next lint",
