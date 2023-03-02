@@ -72,3 +72,15 @@ model Quest {
 
   @@unique([gameId, nftId])
 }
+
+model Job {
+  id          Int      @id @default(autoincrement())
+  signature   String   @unique
+  handler     String
+  payload     String
+  signer      String
+  timestamp   DateTime
+  isProcessed Boolean  @default(false)
+
+  @@index([isProcessed])
+}

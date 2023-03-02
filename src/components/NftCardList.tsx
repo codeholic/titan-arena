@@ -6,18 +6,17 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { DataContext } from '../pages';
 import NftCard from './NftCard';
-import { Message, Transaction } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
-import superjson from 'superjson';
 import { Spinner } from './Spinner';
-import { BuildTransactionResult } from '../lib/types';
+import { RequestQuestPayload } from '../lib/types';
+import requestAndExecuteTransaction from '../lib/requestAndExecuteTransaction';
 
 export const NftCardList = () => {
     const wallet = useWallet();
     const theme = useTheme();
 
     const { control, register, handleSubmit, setValue, reset } = useForm();
-    const { nfts, reload } = useContext(DataContext);
+    const { currentGame, nfts, reload } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 
@@ -63,67 +62,28 @@ export const NftCardList = () => {
     );
 
     const onSubmit = async (data: any) => {
-        if (!wallet || !nfts || mints.length === 0) {
+        if (!wallet || !nfts || !currentGame || mints.length === 0) {
             return;
         }
 
         setIsSubmitting(true);
 
-        await fetch('/api/buildPayment', {
-            method: 'POST',
-            body: JSON.stringify({
-                payer: wallet.publicKey?.toBase58(),
-                nftCount: mints.length,
-            }),
-            headers: { 'Content-Type': 'application/json' },
+        const payload: RequestQuestPayload = {
+            gameId: currentGame.id,
+            mints,
+        };
+
+        await requestAndExecuteTransaction({
+            wallet,
+            requestEndpoint: '/api/requestQuest',
+            executeEndpoint: '/api/claimQuest',
+            payload,
         })
-            .then((data) =>
-                data
-                    .text()
-                    .then(superjson.parse)
-                    .catch(() => Promise.reject({ message: 'Internal server error.' }))
-                    .then((result) => {
-                        if (!data.ok) {
-                            return Promise.reject(result);
-                        }
+            .then(() => {
+                toast.success('Titans have embarked on a quest!');
 
-                        const { transactionMessage, checksum } = result as BuildTransactionResult;
-
-                        const transaction = Transaction.populate(
-                            Message.from(Buffer.from(transactionMessage, 'base64')),
-                            []
-                        );
-
-                        return wallet.signTransaction!(transaction).then(({ signature }) =>
-                            !signature
-                                ? Promise.reject('No signature.')
-                                : fetch('/api/confirmPayment', {
-                                      method: 'POST',
-                                      body: JSON.stringify({
-                                          mints,
-                                          transactionMessage,
-                                          checksum,
-                                          signature: signature.toString('base64'),
-                                      }),
-                                      headers: { 'Content-Type': 'application/json' },
-                                  }).then((data) =>
-                                      data
-                                          .text()
-                                          .then(superjson.parse)
-                                          .catch(() => Promise.reject({ message: 'Internal server error.' }))
-                                          .then((result) => {
-                                              if (!data.ok) {
-                                                  return Promise.reject(result);
-                                              }
-
-                                              toast.success('Titans have embarked on a quest!');
-
-                                              reset({ nfts: {} });
-                                          })
-                                  )
-                        );
-                    })
-            )
+                setTimeout(() => reset({ nfts: {} }), 100);
+            })
             .catch((err) => toast.error(err.message))
             .finally(() => {
                 setIsSubmitting(false);

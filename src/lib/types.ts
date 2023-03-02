@@ -1,4 +1,5 @@
-import { Game, Nft, Quest } from '@prisma/client';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { Game, Nft, Prisma, Quest } from '@prisma/client';
 
 export type Stats = {
     clanId: number;
@@ -16,7 +17,37 @@ export interface GetCurrentGameResult {
     playerStats?: Stats[];
 }
 
-export interface BuildTransactionResult {
+export type ExecuteTransactionHandlerArgs<TPayload> = {
+    connection: Connection;
+    payload: TPayload;
+    prisma: Prisma.TransactionClient;
+    signer: PublicKey;
+    timestamp: number;
+};
+
+export type ExecuteTransactionHandler<TPayload> = (_args: ExecuteTransactionHandlerArgs<TPayload>) => Promise<any>;
+
+export type RequestTransactionParams<T> = {
+    signer: string;
+    payload: T;
+};
+
+export type RequestTransactionResult = {
     transactionMessage: string;
     checksum: string;
-}
+    timestamp: number;
+};
+
+export type ExecuteTransactionParams<TPayload> = {
+    checksum: string;
+    timestamp: number;
+    transactionMessage: string;
+    signature: string;
+    payload: TPayload;
+};
+
+export type RequestQuestPayload = {
+    gameId: number;
+    mints: string[];
+};
+export type ClaimQuestHandlerArgs = ExecuteTransactionHandlerArgs<RequestQuestPayload>;
