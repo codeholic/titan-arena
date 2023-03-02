@@ -121,7 +121,10 @@ const NftCard = forwardRef<HTMLInputElement, NftCardProps>(
 
         const isQuesting = useMemo(() => !!nft.quests?.[0]?.startedAt, [nft]);
 
-        useEffect(() => setValue(name, checked && !isQuesting), [name, checked, setValue, isQuesting]);
+        useEffect(
+            () => setValue(name, checked && !isQuesting && !nft.lockedAt),
+            [name, checked, setValue, isQuesting, nft.lockedAt]
+        );
 
         useEffect(() => setChecked(defaultChecked), [defaultChecked]);
 
