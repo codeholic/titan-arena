@@ -8,6 +8,7 @@ export type Stats = {
     total: bigint;
     played: bigint;
     points: bigint;
+    paid: bigint;
 };
 
 export interface GetCurrentGameResult {

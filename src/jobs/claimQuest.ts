@@ -1,28 +1,43 @@
+import { Nft } from '@prisma/client';
 import { ClaimQuestHandlerArgs } from '../lib/types';
-import { calculateQuestPoints } from '../lib/utils';
+import { calculateClanFees, calculateQuestPoints, getOldStats } from '../lib/utils';
 
-export const execute = async ({ payload, prisma, timestamp }: ClaimQuestHandlerArgs) => {
+export const execute = async ({ connection, payload, prisma, signer, timestamp }: ClaimQuestHandlerArgs) => {
     const { mints, gameId } = payload;
 
-    return Promise.all(
-        mints.map(async (mint) => {
-            const { clanId } = (await prisma.nft.findUnique({ where: { mint } }))!;
+    const now = new Date(timestamp);
+    const oldStats = await getOldStats({ connection, gameId, prisma, owner: signer });
 
-            const { value: clanMultiplier } = (await prisma.clanMultiplier.findFirst({
-                where: { clanId: clanId, gameId },
-            }))!;
+    const game = await prisma.game.findUnique({ where: { id: gameId } });
+    const nfts = await prisma.nft.findMany({ where: { mint: { in: mints } } });
 
-            const game = await prisma.game.findUnique({ where: { id: gameId } });
+    const nftsByClanId = nfts.reduce((result: Record<string, Nft[]>, nft) => {
+        result[nft.clanId] ||= [];
+        result[nft.clanId].push(nft);
 
-            return prisma.quest.create({
-                data: {
-                    nft: { connect: { mint } },
-                    game: { connect: { id: gameId } },
-                    points: calculateQuestPoints(game!, clanMultiplier),
-                    startedAt: new Date(timestamp),
-                },
-            });
+        return result;
+    }, {});
+
+    const clanMultipliers: Record<string, number> = (
+        await prisma.clanMultiplier.findMany({
+            where: { gameId },
         })
+    ).reduce((result, { clanId, value }) => ({ [clanId]: value, ...result }), {});
+
+    return Promise.all(
+        Object.entries(nftsByClanId).flatMap(([clanId, nfts]) =>
+            nfts.map(({ mint }, index) =>
+                prisma.quest.create({
+                    data: {
+                        nft: { connect: { mint } },
+                        game: { connect: { id: gameId } },
+                        points: calculateQuestPoints(game!, clanMultipliers[clanId], now),
+                        paid: calculateClanFees((oldStats?.[clanId] || 0) + index, 1),
+                        startedAt: now,
+                    },
+                })
+            )
+        )
     );
 };
 

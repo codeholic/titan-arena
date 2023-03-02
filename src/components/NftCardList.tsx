@@ -38,6 +38,8 @@ export const NftCardList = () => {
         [nfts]
     );
 
+    const isLocked = useMemo(() => !!nfts && !nfts.every(({ lockedAt }) => !lockedAt), [nfts]);
+
     const allSelected = useMemo(() => {
         const enabledMints = Object.keys(enabledNfts);
 
@@ -128,7 +130,7 @@ export const NftCardList = () => {
                     <Button
                         type="submit"
                         variant="contained"
-                        disabled={isSubmitting || !Object.keys(enabledNfts).length}
+                        disabled={isSubmitting || isLocked || !Object.keys(enabledNfts).length}
                     >
                         Submit
                     </Button>

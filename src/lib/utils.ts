@@ -5,6 +5,7 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '@solana/spl-token
 import { Game, Prisma, PrismaClient } from '@prisma/client';
 import { Stats } from './types';
 import BigNumber from 'bignumber.js';
+import { FEE_THRESHOLDS } from './constants';
 
 ed25519.utils.sha512Sync = (...m) => sha512(ed25519.utils.concatBytes(...m));
 
@@ -50,7 +51,8 @@ export const getStats = (
             ClanMultiplier.value AS clanMultiplier,
             COUNT(Nft.id) AS total,
             COUNT(Quest.id) AS played,
-            IFNULL(SUM(Quest.points), 0) AS points
+            IFNULL(SUM(Quest.points), 0) AS points,
+            IFNULL(SUM(Quest.paid), 0) as paid
         FROM
             Game
             INNER JOIN ClanMultiplier ON ClanMultiplier.gameId = Game.id
@@ -82,7 +84,6 @@ export const calculateQuestPoints = (game: Game, clanMultiplier: number, started
 
 const WINNERS_SHARE_PERCENT = BigInt(70);
 const RUNNERUPS_SHARE_PERCENT = BigInt(20);
-export const LAMPORTS_PER_NFT = BigInt(10000000);
 export const EMISSION_RATE = BigInt(1000);
 
 export const getEarnings = (
@@ -98,8 +99,7 @@ export const getEarnings = (
     playerEarnings?: bigint[];
     playerEarned?: bigint;
 } => {
-    const totalPlayed = clanStats.reduce((result, { played }) => result + played, BigInt(0));
-    const totalPaid = totalPlayed * LAMPORTS_PER_NFT;
+    const totalPaid = clanStats.reduce((result, { paid }) => result + paid, BigInt(0));
     const totalEarned = totalPaid * EMISSION_RATE;
 
     const sortedClanStats = [...clanStats];
@@ -132,9 +132,7 @@ export const getEarnings = (
               BigInt(clanStats.length - Object.keys(firstPlace).length - Object.keys(lastPlace).length)
     );
 
-    const playerPlayed = playerStats && playerStats.reduce((result, { played }) => result + played, BigInt(0));
-
-    const playerPaid = playerPlayed === undefined ? undefined : playerPlayed * LAMPORTS_PER_NFT;
+    const playerPaid = playerStats && playerStats.reduce((result, { paid }) => result + paid, BigInt(0));
 
     const playerStatsMap = playerStats?.reduce(
         (result: Record<number, Stats>, stats: Stats) => ({ [stats.clanId]: stats, ...result }),
@@ -186,3 +184,70 @@ export const calculatePendingReward = async (
 
 export const formatAmount = (bignum: bigint, decimals: number) =>
     Number(Number(new BigNumber(bignum.toString()).div(10 ** decimals)).toFixed(2));
+
+const eachCons = (array: Array<any>, num: number) =>
+    Array.from({ length: array.length - num + 1 }, (_, i) => array.slice(i, i + num));
+
+interface GetOldStatsArgs {
+    connection: Connection;
+    prisma: Prisma.TransactionClient;
+    owner: PublicKey;
+    gameId: number;
+}
+
+export const getOldStats = async ({
+    connection,
+    gameId,
+    prisma,
+    owner,
+}: GetOldStatsArgs): Promise<Record<string, number>> => {
+    const ownedTokenMints = await getOwnedTokenMints({ connection, owner });
+
+    return (
+        await prisma.nft.groupBy({
+            by: ['clanId'],
+            _count: { id: true },
+            where: { mint: { in: ownedTokenMints }, quests: { some: { gameId } } },
+        })
+    ).reduce((result, row) => ({ [row.clanId]: row._count.id, ...result }), {});
+};
+
+export const calculateClanFees = (oldCount: number, newCount: number) =>
+    eachCons(FEE_THRESHOLDS, 2).reduce(
+        (result, [{ threshold, fee }, { threshold: nextThreshold }]) =>
+            oldCount < nextThreshold && threshold < oldCount + newCount
+                ? result + BigInt(Math.min(oldCount + newCount, nextThreshold) - Math.max(oldCount, threshold)) * fee
+                : result,
+        BigInt(0)
+    );
+
+export interface CalculateFeesArgs {
+    connection: Connection;
+    prisma: Prisma.TransactionClient;
+    owner: PublicKey;
+    gameId: number;
+    mints: string[];
+}
+
+export const calculateFees = async ({
+    connection,
+    prisma,
+    owner,
+    gameId,
+    mints,
+}: CalculateFeesArgs): Promise<bigint> => {
+    const oldStats = await getOldStats({ connection, gameId, prisma, owner });
+
+    const newStats = (
+        await prisma.nft.groupBy({
+            by: ['clanId'],
+            _count: { id: true },
+            where: { mint: { in: mints } },
+        })
+    ).reduce((result, row) => ({ [row.clanId]: row._count.id, ...result }), {} as Record<string, number>);
+
+    return Object.entries(newStats).reduce(
+        (result: bigint, [clanId, count]) => result + calculateClanFees(oldStats?.[clanId] || 0, count),
+        BigInt(0)
+    );
+};

@@ -11,26 +11,26 @@ datasource db {
 }
 
 model Clan {
-  id              Int               @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   clanMultipliers ClanMultiplier[]
-  name            String            @unique
+  name            String           @unique
   nfts            Nft[]
-  position        Int               @unique
+  position        Int              @unique
 }
 
 model ClanMultiplier {
-  id      Int     @id @default(autoincrement())
-  clan    Clan    @relation(fields: [clanId], references: [id])
-  clanId  Int
-  game    Game    @relation(fields: [gameId], references: [id])
-  gameId  Int
-  value   Float   @default(1.0)
+  id     Int   @id @default(autoincrement())
+  clan   Clan  @relation(fields: [clanId], references: [id])
+  clanId Int
+  game   Game  @relation(fields: [gameId], references: [id])
+  gameId Int
+  value  Float @default(1.0)
 
   @@unique([clanId, gameId])
 }
 
 model Game {
-  id              Int               @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   clanMultipliers ClanMultiplier[]
   endsAt          DateTime
   opensAt         DateTime
@@ -39,19 +39,19 @@ model Game {
 }
 
 model Nft {
-  id        Int       @id @default(autoincrement())
-  clan      Clan      @relation(fields: [clanId], references: [id])
-  clanId    Int
-  imageUrl  String
-  lockedAt  DateTime?
-  mint      String    @unique
-  name      String    @unique
-  traits    Trait[]
-  quests    Quest[]
+  id       Int       @id @default(autoincrement())
+  clan     Clan      @relation(fields: [clanId], references: [id])
+  clanId   Int
+  imageUrl String
+  lockedAt DateTime?
+  mint     String    @unique
+  name     String    @unique
+  traits   Trait[]
+  quests   Quest[]
 }
 
 model Trait {
-  id    Int     @id @default(autoincrement())
+  id    Int    @id @default(autoincrement())
   name  String
   nfts  Nft[]
   value String
@@ -60,12 +60,13 @@ model Trait {
 }
 
 model Quest {
-  id              Int     @id @default(autoincrement())
-  clamedAt  DateTime?
-  game            Game    @relation(fields: [gameId], references: [id])
+  id              Int       @id @default(autoincrement())
+  clamedAt        DateTime?
+  game            Game      @relation(fields: [gameId], references: [id])
   gameId          Int
-  nft             Nft     @relation(fields: [nftId], references: [id])
+  nft             Nft       @relation(fields: [nftId], references: [id])
   nftId           Int
+  paid            BigInt    @default(10000000)
   points          Int?
   rewardClaimedAt DateTime?
   startedAt       DateTime

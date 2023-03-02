@@ -1,4 +1,3 @@
-import type { WalletError } from '@solana/wallet-adapter-base';
 import { WalletDialogProvider } from '@solana/wallet-adapter-material-ui';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import {
@@ -26,7 +25,7 @@ const WalletConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => 
 
     return (
         <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets}>
+            <WalletProvider wallets={wallets} autoConnect>
                 <WalletDialogProvider featuredWallets={wallets.length}>{children}</WalletDialogProvider>
             </WalletProvider>
         </ConnectionProvider>
