@@ -25,12 +25,14 @@ export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult =
             headers: { 'Content-Type': 'application/json' },
         }).then((res) => res.text().then(superjson.parse));
 
+    const refreshInterval = 30000; // milliseconds
+
     const {
         data,
         isLoading,
         isValidating,
         mutate: reload,
-    } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args));
+    } = useSWR(['/api/getCurrentGame', player?.toBase58()], (args) => fetcher(...args), { refreshInterval });
 
     return { ...((data as Object) || {}), isLoading, isValidating, reload };
 };
