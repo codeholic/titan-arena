@@ -118,6 +118,7 @@ export const NftCardList = () => {
                 <Stack direction="row" my={2} spacing={2}>
                     {clanStats.map(({ clanId, clanName }) => (
                         <ToggleButton
+                            key={clanId}
                             value=""
                             selected={allClanSelected[clanId]}
                             onChange={() => toggleAllClan(clanId, !allClanSelected[clanId])}
