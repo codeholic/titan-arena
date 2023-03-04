@@ -34,7 +34,7 @@ export const NftCardList = () => {
                 : nfts.reduce(
                       (result: Record<number, Record<string, boolean>>, { clanId, lockedAt, mint, quests }) =>
                           !quests[0]?.startedAt && !lockedAt
-                              ? { [clanId]: { [mint]: true, ...(result[clanId] ? result[clanId] : {}) }, ...result }
+                              ? { ...result, [clanId]: { [mint]: true, ...(result[clanId] || {}) } }
                               : result,
                       {}
                   ),
