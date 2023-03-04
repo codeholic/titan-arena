@@ -25,7 +25,7 @@ export const useCurrentGame = (player: PublicKey | null): UseCurrentGameResult =
             headers: { 'Content-Type': 'application/json' },
         }).then((res) => res.text().then(superjson.parse));
 
-    const refreshInterval = 30000; // milliseconds
+    const refreshInterval = 5000; // milliseconds
 
     const {
         data,
