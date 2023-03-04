@@ -1,6 +1,6 @@
 import CheckboxCheckedIcon from '@mui/icons-material/CheckBox';
 import CheckboxBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { Box, Button, Grid, Skeleton, ToggleButton, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Grid, Skeleton, Stack, ToggleButton, useMediaQuery, useTheme } from '@mui/material';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -10,13 +10,14 @@ import { toast } from 'react-hot-toast';
 import { Spinner } from './Spinner';
 import { RequestQuestPayload } from '../lib/types';
 import requestAndExecuteTransaction from '../lib/requestAndExecuteTransaction';
+import { Nft } from '@prisma/client';
 
 export const NftCardList = () => {
     const wallet = useWallet();
     const theme = useTheme();
 
     const { control, register, handleSubmit, setValue, reset } = useForm();
-    const { currentGame, nfts, reload } = useContext(DataContext);
+    const { currentGame, clanStats, nfts, reload } = useContext(DataContext);
 
     const selectedNfts = useWatch({ control, name: 'nfts', defaultValue: {} });
 
@@ -31,8 +32,10 @@ export const NftCardList = () => {
             !nfts
                 ? {}
                 : nfts.reduce(
-                      (result: Record<string, boolean>, { mint, lockedAt, quests }) =>
-                          !quests[0]?.startedAt && !lockedAt ? { [mint]: true, ...result } : result,
+                      (result: Record<number, Record<string, boolean>>, { clanId, lockedAt, mint, quests }) =>
+                          !quests[0]?.startedAt && !lockedAt
+                              ? { [clanId]: { [mint]: true, ...(result[clanId] ? result[clanId] : {}) }, ...result }
+                              : result,
                       {}
                   ),
         [nfts]
@@ -40,21 +43,37 @@ export const NftCardList = () => {
 
     const isLocked = useMemo(() => !!nfts && !nfts.every(({ lockedAt }) => !lockedAt), [nfts]);
 
-    const allSelected = useMemo(() => {
-        const enabledMints = Object.keys(enabledNfts);
+    const allClanSelected: Record<number, boolean> = useMemo(() => {
+        return !clanStats || !Object.keys(enabledNfts).length
+            ? {}
+            : clanStats.reduce((result, { clanId }) => {
+                  const enabledMints = Object.keys(enabledNfts[clanId] || {});
 
-        return !!enabledMints.length && enabledMints.every((mint) => selectedNfts[mint]);
-    }, [enabledNfts, selectedNfts]);
+                  return {
+                      [clanId]: !!enabledMints.length && enabledMints.every((mint) => selectedNfts[mint]),
+                      ...result,
+                  };
+              }, {});
+    }, [enabledNfts, clanStats, selectedNfts]);
 
-    const toggleAll = useCallback(
-        (selected: boolean) => {
-            if (!Object.keys(enabledNfts).length) {
+    const toggleAllClan = useCallback(
+        (clanId: number, selected: boolean) => {
+            if (!nfts?.length || !Object.keys(enabledNfts[clanId] || {}).length) {
                 return;
             }
 
-            setValue('nfts', selected ? enabledNfts : {});
+            setValue(
+                'nfts',
+                nfts.reduce(
+                    (result, nft) => ({
+                        [nft.mint]: nft.clanId == clanId ? selected : selectedNfts[nft.mint],
+                        ...result,
+                    }),
+                    {}
+                )
+            );
         },
-        [enabledNfts, setValue]
+        [nfts, enabledNfts, setValue, selectedNfts]
     );
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,17 +114,25 @@ export const NftCardList = () => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <Box my={2}>
-                <ToggleButton
-                    value=""
-                    selected={allSelected}
-                    onChange={() => toggleAll(!allSelected)}
-                    disabled={!Object.keys(enabledNfts).length}
-                >
-                    {allSelected ? <CheckboxCheckedIcon sx={{ mr: 1 }} /> : <CheckboxBlankIcon sx={{ mr: 1 }} />}
-                    Select all
-                </ToggleButton>
-            </Box>
+            {clanStats && (
+                <Stack direction="row" my={2} spacing={2}>
+                    {clanStats.map(({ clanId, clanName }) => (
+                        <ToggleButton
+                            value=""
+                            selected={allClanSelected[clanId]}
+                            onChange={() => toggleAllClan(clanId, !allClanSelected[clanId])}
+                            disabled={!Object.keys(enabledNfts).length}
+                        >
+                            {allClanSelected[clanId] ? (
+                                <CheckboxCheckedIcon sx={{ mr: 1 }} />
+                            ) : (
+                                <CheckboxBlankIcon sx={{ mr: 1 }} />
+                            )}
+                            {clanName}
+                        </ToggleButton>
+                    ))}
+                </Stack>
+            )}
 
             <Grid container spacing={2} columns={columns}>
                 {(!nfts ? Array(columns * 2).fill(undefined) : nfts).map((nft, index: number) => (
