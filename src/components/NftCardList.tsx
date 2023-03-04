@@ -66,7 +66,8 @@ export const NftCardList = () => {
                 'nfts',
                 nfts.reduce(
                     (result, nft) => ({
-                        [nft.mint]: nft.clanId == clanId ? selected : selectedNfts[nft.mint],
+                        [nft.mint]:
+                            nft.clanId == clanId ? enabledNfts[clanId][nft.mint] && selected : selectedNfts[nft.mint],
                         ...result,
                     }),
                     {}
